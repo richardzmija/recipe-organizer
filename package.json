@@ -3,7 +3,10 @@
   "version": "1.0.0",
   "description": "",
   "scripts": {
-    "prepare": "husky"
+    "prepare": "husky",
+    "run:frontend": "cd frontend && npm run dev",
+    "setup": "npm i && npm run setup:frontend",
+    "setup:frontend": "cd frontend && npm i"
   },
   "workspaces": [
     "frontend",
