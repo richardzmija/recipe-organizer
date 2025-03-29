@@ -23,6 +23,6 @@ WORKDIR /app
 # Copy just the JAR file that we built in the previous stage.
 COPY --from=build /app/target/*.jar app.jar
 # This is for documentation that the application listens on port 8000.
-EXPOSE 8000
+EXPOSE 8080
 # This is the command that will be run when the container starts.
 ENTRYPOINT ["java", "-jar", "/app/app.jar"]
