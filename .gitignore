@@ -15,7 +15,8 @@
 *.rar
 
 # IntellijIDEA
-.idea/
+.idea
+target
 
 # MacOS
 .DS_Store
