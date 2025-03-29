@@ -1,0 +1,36 @@
+{
+  "name": "recipe-organizer",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "prepare": "husky",
+    "run:frontend": "cd frontend && npm run dev",
+    "setup": "npm i && npm run setup:frontend",
+    "setup:frontend": "cd frontend && npm i"
+  },
+  "workspaces": [
+    "frontend",
+    "backend"
+  ],
+  "lint-staged": {
+    "frontend/**/*.{ts,tsx,js,jsx,html,css}": [
+      "npm --prefix frontend run lint",
+      "npm --prefix frontend run prettier"
+    ]
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/richardzmija/recipe-organizer.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/richardzmija/recipe-organizer/issues"
+  },
+  "homepage": "https://github.com/richardzmija/recipe-organizer#readme",
+  "devDependencies": {
+    "husky": "^9.1.7",
+    "lint-staged": "^15.5.0"
+  }
+}
