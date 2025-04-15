@@ -2,11 +2,9 @@ package edu.agh.recipe.service;
 
 import edu.agh.recipe.model.Metric;
 import edu.agh.recipe.model.Recipe;
-import edu.agh.recipe.model.dto.MessageDTO;
 import edu.agh.recipe.model.dto.RecipeRequestDTO;
 import edu.agh.recipe.repository.RecipeRepository;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
