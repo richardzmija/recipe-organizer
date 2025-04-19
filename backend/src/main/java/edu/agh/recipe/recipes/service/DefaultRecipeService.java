@@ -32,18 +32,21 @@ public class DefaultRecipeService implements RecipeService {
         return recipePage.map(RecipeDTO::fromEntity);
     }
 
+    @Override
     public RecipeDTO getRecipeById(String id) {
         Recipe recipe = recipeRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Recipe not found"));
         return RecipeDTO.fromEntity(recipe);
     }
 
+    @Override
     public RecipeDTO createRecipe(@Valid CreateRecipeDTO dto) {
         Recipe recipe = toEntity(dto);
         Recipe savedRecipe = recipeRepository.save(recipe);
         return RecipeDTO.fromEntity(savedRecipe);
     }
 
+    @Override
     public RecipeDTO updateRecipe(String id, @Valid UpdateRecipeDTO dto) {
         if (!recipeRepository.existsById(id)) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Recipe not found");
@@ -55,10 +58,17 @@ public class DefaultRecipeService implements RecipeService {
         return RecipeDTO.fromEntity(updatedRecipe);
     }
 
+    @Override
     public void deleteRecipe(String id) {
         if (recipeRepository.existsById(id)) {
             recipeRepository.deleteById(id);
         }
+    }
+
+    @Override
+    public Page<RecipeDTO> getRecipesByIngredients(List<String> ingredients, Pageable pageable) {
+        Page<Recipe> recipePage = recipeRepository.findByIngredientsIngredientNameIn(ingredients, pageable);
+        return recipePage.map(RecipeDTO::fromEntity);
     }
 
     private Recipe createRecipeEntity(String name, String description,

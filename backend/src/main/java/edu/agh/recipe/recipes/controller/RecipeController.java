@@ -21,6 +21,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Objects;
 
 @RestController
@@ -71,6 +72,28 @@ public class RecipeController {
             @PathVariable String id
     ) {
         return ResponseEntity.ok(recipeService.getRecipeById(id));
+    }
+
+    @Operation(
+            summary = "Filter recipes by ingredients.",
+            description = "Returns a paginated list of recipes that contain any of the specified ingredients."
+    )
+    @ApiResponse(
+            responseCode = "200",
+            description = "Successfully retrieved filtered recipes",
+            content = @Content(schema = @Schema(implementation = Page.class))
+    )
+    @GetMapping("/filter")
+    public ResponseEntity<Page<RecipeDTO>> getRecipesByIngredients(
+            @RequestParam List<String> ingredients,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "name") String sort,
+            @RequestParam(defaultValue = "asc") String direction
+    ) {
+        Sort.Direction sortDirection = Sort.Direction.fromString(direction);
+        Pageable pageable = PageRequest.of(page, size, Sort.by(sortDirection, sort));
+        return ResponseEntity.ok(recipeService.getRecipesByIngredients(ingredients, pageable));
     }
 
     @Operation(
