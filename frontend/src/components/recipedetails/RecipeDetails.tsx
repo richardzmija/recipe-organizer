@@ -14,11 +14,10 @@ import {
   Separator,
   Box,
   Image,
+  Card,
 } from '@chakra-ui/react';
-import { Card, CardBody } from '@chakra-ui/card';
-import { useColorModeValue } from './ui/color-mode';
+import StepNavigator from './StepNavigator';
 
-// Recipe types
 interface Step {
   title: string;
   text: string;
@@ -42,39 +41,39 @@ interface Recipe {
 
 const mockRecipe: Recipe = {
   id: '67fe8333c122b4095776c449',
-  name: 'Woda w szklance z cukrem',
-  description: 'Szybki przepis na wodę w szklance z cukrem i miodem',
+  name: 'Water with sugar and honey',
+  description: 'Quick recipe for water in a glass with sugar and honey',
   image: 'https://placehold.co/600x400/EEE/31343C',
-  tags: ['Wege', 'Szybkie', 'Łatwe'],
+  tags: ['Vegetarian', 'Quick', 'Easy'],
   ingredients: [
     {
-      ingredientName: 'Woda',
+      ingredientName: 'Water',
       metric: 'CUPS',
       quantity: 1,
     },
     {
-      ingredientName: 'Cukier',
+      ingredientName: 'Sugar',
       metric: 'TEASPOONS',
       quantity: 1,
     },
     {
-      ingredientName: 'Miód',
+      ingredientName: 'Honey',
       metric: 'TEASPOONS',
       quantity: 1,
     },
   ],
   steps: [
     {
-      title: 'Lanie wody',
-      text: 'Wlać kubek wody do szklanki',
+      title: 'Pour water',
+      text: 'Pour water into a glass',
     },
     {
-      title: 'Dodanie cukru',
-      text: 'Dodaj 1 łyżeczkę cukru',
+      title: 'Add sugar',
+      text: 'Add 1 teaspoon of sugar',
     },
     {
-      title: 'Dodanie miodu',
-      text: 'Dodaj 1 łyżeczkę miodu',
+      title: 'Add honey',
+      text: 'Add 1 teaspoon of honey',
     },
   ],
 };
@@ -84,9 +83,6 @@ export default function RecipeDetails() {
   const [recipe, setRecipe] = useState<Recipe | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-
-  const bgColor = useColorModeValue('white', 'gray.800');
-  const borderColor = useColorModeValue('gray.200', 'gray.700');
 
   useEffect(() => {
     setRecipe(mockRecipe);
@@ -143,7 +139,7 @@ export default function RecipeDetails() {
   if (!recipe) {
     return (
       <Container maxW='container.md' py={5}>
-        <Alert.Root>
+        <Alert.Root status='warning'>
           <Alert.Indicator />
           <Alert.Content>
             <Alert.Title>No recipe data available</Alert.Title>
@@ -158,14 +154,14 @@ export default function RecipeDetails() {
       <VStack align='stretch'>
         <Flex direction={{ base: 'column', md: 'row' }} align='flex-start'>
           <Box flex='2'>
-            <Heading as='h1' size='xl'>
+            <Heading as='h1' size='3xl' mb={1}>
               {recipe.name}
             </Heading>
 
             {recipe.tags && recipe.tags.length > 0 && (
-              <HStack spaceX={2}>
+              <HStack spaceX={2} mb={4}>
                 {recipe.tags.map((tag, index) => (
-                  <Badge key={index} colorScheme='teal' variant='subtle'>
+                  <Badge key={index} colorPalette='orange' variant='surface' shadow='sm'>
                     {tag}
                   </Badge>
                 ))}
@@ -184,11 +180,11 @@ export default function RecipeDetails() {
         <Separator />
 
         <Box>
-          <Heading as='h2' size='lg' mb={4}>
-            Składniki
+          <Heading as='h2' size='xl' mb='2'>
+            Ingredients
           </Heading>
-          <Card variant='outline' borderColor={borderColor} bg={bgColor}>
-            <CardBody>
+          <Card.Root variant='outline' shadow='xl'>
+            <Card.Body>
               <List.Root>
                 {recipe.ingredients.map((ingredient, index) => (
                   <List.Item key={index}>
@@ -196,31 +192,15 @@ export default function RecipeDetails() {
                   </List.Item>
                 ))}
               </List.Root>
-            </CardBody>
-          </Card>
+            </Card.Body>
+          </Card.Root>
         </Box>
 
-        <Separator />
+        <Heading as='h2' size='xl'>
+          Steps
+        </Heading>
 
-        <Box>
-          <Heading as='h2' size='lg' mb={4}>
-            Kroki
-          </Heading>
-          <List.Root as='ol'>
-            {recipe.steps.map((step, index) => (
-              <List.Item key={index}>
-                <Card variant='outline' borderColor={borderColor} bg={bgColor} mb={2}>
-                  <CardBody>
-                    <Heading as='h3' size='md' mb={2}>
-                      {step.title}
-                    </Heading>
-                    <Text>{step.text}</Text>
-                  </CardBody>
-                </Card>
-              </List.Item>
-            ))}
-          </List.Root>
-        </Box>
+        <StepNavigator steps={recipe.steps} />
       </VStack>
     </Container>
   );

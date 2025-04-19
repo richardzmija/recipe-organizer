@@ -7,7 +7,7 @@ export default function Navbar() {
   return (
     <HStack as='nav' width='100%' py={4} px={6} justify='space-between' bg={bgColor}>
       <Box>
-        <Heading as='h1' size='md'>
+        <Heading as='h1' size='3xl'>
           <Link to='/'>Recipe Organizer</Link>
         </Heading>
       </Box>

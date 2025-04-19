@@ -1,7 +1,7 @@
 import { Box } from '@chakra-ui/react';
 import { JSX } from '@emotion/react/jsx-runtime';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import RecipeDetails from './components/RecipeDetails';
+import RecipeDetails from './components/recipedetails/RecipeDetails';
 import Navbar from './components/Navbar';
 
 function App(): JSX.Element {
@@ -9,7 +9,7 @@ function App(): JSX.Element {
     <Router>
       <Box>
         <Navbar />
-        <Box p={4}>
+        <Box>
           <Routes>
             <Route path='/recipe/:id' element={<RecipeDetails />} />
           </Routes>
