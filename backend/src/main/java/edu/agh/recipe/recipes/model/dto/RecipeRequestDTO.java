@@ -1,7 +1,7 @@
-package edu.agh.recipe.model.dto;
+package edu.agh.recipe.recipes.model.dto;
 
-import edu.agh.recipe.model.RecipeIngredient;
-import edu.agh.recipe.model.RecipeStep;
+import edu.agh.recipe.recipes.model.RecipeIngredient;
+import edu.agh.recipe.recipes.model.RecipeStep;
 
 import java.util.List;
 

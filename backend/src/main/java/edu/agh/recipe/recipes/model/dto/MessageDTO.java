@@ -1,4 +1,4 @@
-package edu.agh.recipe.model.dto;
+package edu.agh.recipe.recipes.model.dto;
 
 public record MessageDTO (
         String message

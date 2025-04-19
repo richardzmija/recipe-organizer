@@ -1,8 +1,8 @@
-package edu.agh.recipe.service;
+package edu.agh.recipe.recipes.service;
 
-import edu.agh.recipe.model.Recipe;
-import edu.agh.recipe.model.dto.RecipeRequestDTO;
-import edu.agh.recipe.repository.RecipeRepository;
+import edu.agh.recipe.recipes.model.Recipe;
+import edu.agh.recipe.recipes.model.dto.RecipeRequestDTO;
+import edu.agh.recipe.recipes.repository.RecipeRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;

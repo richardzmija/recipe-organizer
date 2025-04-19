@@ -1,7 +1,7 @@
-package edu.agh.recipe.controller;
+package edu.agh.recipe.units.controller;
 
-import edu.agh.recipe.model.dto.UnitDTO;
-import edu.agh.recipe.service.UnitService;
+import edu.agh.recipe.units.dto.UnitDTO;
+import edu.agh.recipe.units.service.UnitService;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;

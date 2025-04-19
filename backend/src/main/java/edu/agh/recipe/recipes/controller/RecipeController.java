@@ -1,9 +1,9 @@
-package edu.agh.recipe.controller;
+package edu.agh.recipe.recipes.controller;
 
-import edu.agh.recipe.model.Recipe;
-import edu.agh.recipe.model.dto.MessageDTO;
-import edu.agh.recipe.model.dto.RecipeRequestDTO;
-import edu.agh.recipe.service.RecipeService;
+import edu.agh.recipe.recipes.model.Recipe;
+import edu.agh.recipe.recipes.model.dto.MessageDTO;
+import edu.agh.recipe.recipes.model.dto.RecipeRequestDTO;
+import edu.agh.recipe.recipes.service.RecipeService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
