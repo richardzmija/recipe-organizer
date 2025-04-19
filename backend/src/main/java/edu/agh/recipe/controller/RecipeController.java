@@ -32,11 +32,6 @@ public class RecipeController {
         return ResponseEntity.ok(recipe);
     }
 
-    @GetMapping("/metrics")
-    public ResponseEntity<List<String>> getRecipeMetrics() {
-        return ResponseEntity.ok(recipeService.getAllMetrics());
-    }
-
     @PostMapping()
     public ResponseEntity<MessageDTO> addRecipe(@RequestBody RecipeRequestDTO dto) {
         recipeService.addRecipe(dto);
