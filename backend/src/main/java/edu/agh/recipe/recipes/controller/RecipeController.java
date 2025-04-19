@@ -1,40 +1,117 @@
 package edu.agh.recipe.recipes.controller;
 
-import edu.agh.recipe.recipes.model.Recipe;
-import edu.agh.recipe.recipes.model.dto.MessageDTO;
-import edu.agh.recipe.recipes.model.dto.RecipeRequestDTO;
+import edu.agh.recipe.recipes.dto.CreateRecipeDTO;
+import edu.agh.recipe.recipes.dto.RecipeDTO;
+import edu.agh.recipe.recipes.dto.UpdateRecipeDTO;
 import edu.agh.recipe.recipes.service.RecipeService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Objects;
 
 @RestController
-@RequestMapping("/recipe")
-//@CrossOrigin(origins = "*") // Dla frontendu, aktywacja CORS
+@RequestMapping("/recipes")
+@Tag(name = "Recipe", description = "Recipe management APIs")
 public class RecipeController {
 
     private final RecipeService recipeService;
 
     public RecipeController(RecipeService recipeService) {
-        this.recipeService = recipeService;
+        this.recipeService = Objects.requireNonNull(recipeService);
     }
 
+    @Operation(summary = "Get all recipes.", description = "Returns a list of all available recipes.")
+    @ApiResponse(responseCode = "200", description = "Successfully retrieved recipes",
+            content = @Content(schema = @Schema(implementation = RecipeDTO.class)))
     @GetMapping
-    public ResponseEntity<List<Recipe>> getAllRecipes() {
+    public ResponseEntity<List<RecipeDTO>> getAllRecipes() {
         return ResponseEntity.ok(recipeService.getAllRecipes());
     }
 
+    @Operation(summary = "Get recipe by ID.", description = "Returns a recipe by its ID.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Recipe found",
+                    content = @Content(schema = @Schema(implementation = RecipeDTO.class))),
+            @ApiResponse(responseCode = "404", description = "Recipe not found", content = @Content)
+    })
     @GetMapping("/{id}")
-    public ResponseEntity<Recipe> getRecipeById(@PathVariable String id) {
-        Recipe recipe = recipeService.getRecipeById(id);
-        return ResponseEntity.ok(recipe);
+    public ResponseEntity<RecipeDTO> getRecipeById(
+            @Parameter(description = "Recipe identifier", required = true, in = ParameterIn.PATH)
+            @PathVariable String id
+    ) {
+        return ResponseEntity.ok(recipeService.getRecipeById(id));
     }
 
-    @PostMapping()
-    public ResponseEntity<MessageDTO> addRecipe(@RequestBody RecipeRequestDTO dto) {
-        recipeService.addRecipe(dto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(new MessageDTO("Recipe added successfully"));
+    @Operation(
+            summary = "Create recipe.",
+            description = "Creates a new recipe and returns the created entity.",
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "Recipe details for creation",
+                    required = true,
+                    content = @Content(
+                            schema = @Schema(implementation = CreateRecipeDTO.class)
+                    )
+            )
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Recipe created successfully",
+                    content = @Content(schema = @Schema(implementation = RecipeDTO.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid input", content = @Content)
+    })
+    @PostMapping
+    public ResponseEntity<RecipeDTO> createRecipe(
+            @Valid @RequestBody CreateRecipeDTO recipeDTO
+    ) {
+        RecipeDTO createdRecipe = recipeService.createRecipe(recipeDTO);
+        return ResponseEntity.status(HttpStatus.CREATED).body(createdRecipe);
+    }
+
+    @Operation(
+            summary = "Update recipe.",
+            description = "Updates an existing recipe by ID.",
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "Updated recipe details",
+                    required = true,
+                    content = @Content(schema = @Schema(implementation = UpdateRecipeDTO.class))
+            )
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Recipe updated successfully",
+                    content = @Content(schema = @Schema(implementation = RecipeDTO.class))),
+            @ApiResponse(responseCode = "404", description = "Recipe not found", content = @Content),
+            @ApiResponse(responseCode = "400", description = "Invalid input", content = @Content)
+    })
+    @PutMapping("/{id}")
+    public ResponseEntity<RecipeDTO> updateRecipe(
+            @Parameter(description = "Recipe identifier", required = true, in = ParameterIn.PATH)
+            @PathVariable String id,
+            @Valid @RequestBody UpdateRecipeDTO recipeDTO
+            ) {
+        RecipeDTO updatedRecipe = recipeService.updateRecipe(id, recipeDTO);
+        return ResponseEntity.ok(updatedRecipe);
+    }
+
+    @Operation(summary = "Delete recipe.", description = "Deletes a recipe by ID.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Recipe deleted successfully", content = @Content)
+    })
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteRecipe(
+            @Parameter(description = "Recipe identifier", required = true, in = ParameterIn.PATH)
+            @PathVariable String id
+    ) {
+        recipeService.deleteRecipe(id);
+        return ResponseEntity.noContent().build();
     }
 }

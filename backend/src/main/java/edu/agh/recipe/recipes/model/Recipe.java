@@ -12,25 +12,19 @@ public class Recipe {
     private String id;
     private String name;
     private String description;
-    private String image;
-    // TODO: To na razie lista Stringów, potem (chyba) obiektów? zależy od implementacji
-    private List<String> tags = new ArrayList<>();
     private List<RecipeIngredient> ingredients = new ArrayList<>();
-    private List<RecipeStep> steps;
+    private List<RecipeStep> steps = new ArrayList<>();
 
-    public Recipe(String name, String description, String image, List<String> tags, List<RecipeIngredient> ingredients, List<RecipeStep> steps) {
+    public Recipe(String name, String description, List<RecipeIngredient> ingredients, List<RecipeStep> steps) {
         this.name = name;
         this.description = description;
-        this.image = image;
-        this.tags = tags;
         this.ingredients = ingredients;
         this.steps = steps;
     }
 
-    public Recipe(String name, String description, String image) {
+    public Recipe(String name, String description) {
         this.name = name;
         this.description = description;
-        this.image = image;
     }
 
     public Recipe() {
@@ -58,22 +52,6 @@ public class Recipe {
 
     public void setDescription(String description) {
         this.description = description;
-    }
-
-    public String getImage() {
-        return image;
-    }
-
-    public void setImage(String image) {
-        this.image = image;
-    }
-
-    public List<String> getTags() {
-        return tags;
-    }
-
-    public void setTags(List<String> tags) {
-        this.tags = tags;
     }
 
     public List<RecipeIngredient> getIngredients() {
