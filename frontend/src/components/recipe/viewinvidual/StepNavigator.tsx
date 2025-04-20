@@ -1,11 +1,7 @@
 import { useState } from 'react';
 import { Box, Button, Flex, Heading, Text, Card } from '@chakra-ui/react';
 import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
-
-interface Step {
-  title: string;
-  text: string;
-}
+import { Step } from '../../../types/Step';
 
 interface StepNavigatorProps {
   steps: Step[];

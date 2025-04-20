@@ -1,6 +1,6 @@
 import { HStack, Box, Heading } from '@chakra-ui/react';
 import { Link } from 'react-router-dom';
-import { ColorModeButton, useColorModeValue } from './ui/color-mode';
+import { ColorModeButton, useColorModeValue } from './color-mode';
 
 export default function Navbar() {
   const bgColor = useColorModeValue('gray.200', 'gray.800');
