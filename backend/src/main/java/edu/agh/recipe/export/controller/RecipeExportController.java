@@ -1,6 +1,7 @@
 package edu.agh.recipe.export.controller;
 
 import edu.agh.recipe.export.exception.RecipeExportException;
+import edu.agh.recipe.export.service.RecipeJsonExportService;
 import edu.agh.recipe.export.service.RecipeMarkdownExportService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -29,9 +30,12 @@ public class RecipeExportController {
     private static final Logger logger = LoggerFactory.getLogger(RecipeExportController.class);
 
     private final RecipeMarkdownExportService recipeMarkdownExportService;
+    private final RecipeJsonExportService recipeJsonExportService;
 
-    public RecipeExportController(RecipeMarkdownExportService recipeMarkdownExportService) {
+    public RecipeExportController(RecipeMarkdownExportService recipeMarkdownExportService,
+                                  RecipeJsonExportService recipeJsonExportService) {
         this.recipeMarkdownExportService = Objects.requireNonNull(recipeMarkdownExportService);
+        this.recipeJsonExportService = Objects.requireNonNull(recipeJsonExportService);
     }
 
     @Operation(
@@ -78,6 +82,52 @@ public class RecipeExportController {
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"recipe.zip\"")
                 .contentType(MediaType.APPLICATION_OCTET_STREAM)
                 .body(zipResource);
+    }
+
+    @Operation(
+            summary = "Export all recipes as JSON.",
+            description = "Exports all available recipes to a JSON file."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully exported all recipes",
+                    content = @Content(schema = @Schema(implementation = Resource.class))),
+            @ApiResponse(responseCode = "500", description = "Error exporting recipes", content = @Content)
+    })
+    @GetMapping("/json")
+    public ResponseEntity<Resource> exportAllRecipesAsJson() {
+        logger.info("Exporting all recipes as JSON...");
+        Resource jsonResource = recipeJsonExportService.exportRecipesToJson();
+        logger.info("Successfully exported all recipes to JSON");
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"recipes.json\"")
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(jsonResource);
+    }
+
+    @Operation(
+            summary = "Export a single recipe as JSON.",
+            description = "Exports a specific recipe identified by its ID to a JSON file."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully exported recipe",
+                    content = @Content(schema = @Schema(implementation = Resource.class))),
+            @ApiResponse(responseCode = "404", description = "Recipe not found", content = @Content),
+            @ApiResponse(responseCode = "500", description = "Error exporting recipe", content = @Content)
+    })
+    @GetMapping("/{id}/json")
+    public ResponseEntity<Resource> exportRecipeAsJson(
+            @Parameter(description = "Recipe identifier", required = true, in = ParameterIn.PATH)
+            @PathVariable String id
+    ) {
+        logger.info("Exporting recipe with ID: {} as JSON...", id);
+        Resource jsonResource = recipeJsonExportService.exportRecipeToJson(id);
+        logger.info("Successfully exported recipe ID: {} to JSON", id);
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"recipe.json\"")
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(jsonResource);
     }
 
     @ExceptionHandler(RecipeExportException.class)

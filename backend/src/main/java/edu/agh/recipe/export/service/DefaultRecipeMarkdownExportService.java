@@ -2,18 +2,13 @@ package edu.agh.recipe.export.service;
 
 import edu.agh.recipe.export.exception.RecipeExportException;
 import edu.agh.recipe.recipes.dto.RecipeDTO;
-import edu.agh.recipe.recipes.service.RecipeService;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.zip.ZipEntry;
@@ -22,21 +17,21 @@ import java.util.zip.ZipOutputStream;
 @Service
 public class DefaultRecipeMarkdownExportService implements RecipeMarkdownExportService {
 
-    private final RecipeService recipeService;
+    private final RecipeDataFetcher recipeDataFetcher;
 
-    public DefaultRecipeMarkdownExportService(RecipeService recipeService) {
-        this.recipeService = Objects.requireNonNull(recipeService);
+    public DefaultRecipeMarkdownExportService(RecipeDataFetcher recipeDataFetcher) {
+        this.recipeDataFetcher = Objects.requireNonNull(recipeDataFetcher);
     }
 
     @Override
     public Resource exportRecipesToMarkdownZip() {
-        List<RecipeDTO> allRecipes = fetchAllRecipes();
+        List<RecipeDTO> allRecipes = recipeDataFetcher.fetchAllRecipes();
         return createZipWithMarkdownFiles(allRecipes);
     }
 
     @Override
     public Resource exportRecipeToMarkdownZip(String id) {
-        RecipeDTO recipe = recipeService.getRecipeById(id);
+        RecipeDTO recipe = recipeDataFetcher.fetchRecipeById(id);
         List<RecipeDTO> recipes = List.of(recipe);
         return createZipWithMarkdownFiles(recipes);
     }
@@ -77,23 +72,6 @@ public class DefaultRecipeMarkdownExportService implements RecipeMarkdownExportS
         }
 
         return markdown.toString();
-    }
-
-    private List<RecipeDTO> fetchAllRecipes() {
-        List<RecipeDTO> allRecipes = new ArrayList<>();
-
-        int pageNumber = 0;
-        int pageSize = 100;
-        Page<RecipeDTO> page;
-
-        do {
-            Pageable pageable = PageRequest.of(pageNumber, pageSize);
-            page = recipeService.getAllRecipes(pageable);
-            allRecipes.addAll(page.getContent());
-            pageNumber++;
-        } while (pageNumber < page.getTotalPages());
-
-        return allRecipes;
     }
 
     private Resource createZipWithMarkdownFiles(List<RecipeDTO> recipes) {
