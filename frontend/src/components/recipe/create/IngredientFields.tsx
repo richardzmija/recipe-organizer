@@ -1,5 +1,3 @@
-'use client';
-
 import { Input, HStack, VStack, Button, IconButton, NumberInput } from '@chakra-ui/react';
 import { LuTrash2 } from 'react-icons/lu';
 import MetricSelect from '@/components/common/selects/MetricSelect';

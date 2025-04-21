@@ -1,5 +1,3 @@
-'use client';
-
 import { Box, Text, Input, Flex, IconButton } from '@chakra-ui/react';
 import { LuUpload, LuX } from 'react-icons/lu';
 import { useRef, useState } from 'react';

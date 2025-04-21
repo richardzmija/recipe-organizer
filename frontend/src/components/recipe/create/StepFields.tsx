@@ -1,5 +1,3 @@
-'use client';
-
 import { Box, Button, IconButton, HStack, VStack } from '@chakra-ui/react';
 import { LuTrash2 } from 'react-icons/lu';
 import TextEditor from '@/components/common/TextEditor';

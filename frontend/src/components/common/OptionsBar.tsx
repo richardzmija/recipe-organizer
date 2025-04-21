@@ -1,5 +1,3 @@
-'use client';
-
 import { Box, Button, Input, Flex, Portal, Select, createListCollection } from '@chakra-ui/react';
 import { useNavigate } from 'react-router-dom';
 

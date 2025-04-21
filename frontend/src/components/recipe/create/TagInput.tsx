@@ -1,5 +1,3 @@
-'use client';
-
 import { Input, IconButton, HStack, Box, Flex } from '@chakra-ui/react';
 import { LuPlus, LuX } from 'react-icons/lu';
 import { useState } from 'react';
@@ -37,7 +35,9 @@ const TagInput = ({ tags, onChange }: Props) => {
       <HStack wrap='wrap' gap={2}>
         {tags.map((tag, i) => (
           <Flex key={i} px={2} py={1} bg='gray.100' borderRadius='md' align='center' gap={1}>
-            <Box color='black'>{tag}</Box>
+            <Box color='black' fontWeight='bold'>
+              {tag}
+            </Box>
             <IconButton aria-label={`Usuń tag ${tag}`} size='xs' variant='ghost' onClick={() => handleRemove(i)}>
               <LuX />
             </IconButton>

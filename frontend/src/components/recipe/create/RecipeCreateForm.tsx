@@ -60,6 +60,8 @@ const RecipeCreateForm = ({ onCancel }: { onCancel: () => void }) => {
     }
   };
 
+  const handlePreview = async () => {}; // todo
+
   return (
     <Box bg='white' p={6}>
       <VStack align='start' w='100%'>
@@ -93,6 +95,9 @@ const RecipeCreateForm = ({ onCancel }: { onCancel: () => void }) => {
         <HStack pt={4}>
           <Button variant='solid' bg='black' color='white' _hover={{ bg: 'gray.800' }} onClick={handleSave}>
             Save recipe
+          </Button>
+          <Button variant='outline' color='black' onClick={handlePreview} _hover={{ bg: 'black', color: 'white' }}>
+            Show preview
           </Button>
           <Button variant='outline' color='black' onClick={onCancel} _hover={{ bg: 'black', color: 'white' }}>
             Cancel

@@ -1,5 +1,3 @@
-'use client';
-
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import { Box, Button, HStack } from '@chakra-ui/react';
@@ -47,10 +45,22 @@ const TextEditor = ({ value, onChange, placeholder, width = '100%', height = '77
       overflowWrap='break-word'>
       {editor && (
         <HStack gap={2} mb={2} flexWrap='wrap'>
-          <Button size='xs' onClick={() => editor.chain().focus().toggleBold().run()}>
+          <Button
+            size='xs'
+            onClick={() => editor.chain().focus().toggleBold().run()}
+            fontWeight={editor.isActive('bold') ? 'bold' : 'normal'}
+            bg={editor.isActive('bold') ? 'gray.200' : 'transparent'}
+            color={editor.isActive('bold') ? 'black' : 'gray.600'}
+            _hover={{ bg: 'gray.300' }}>
             Bold
           </Button>
-          <Button size='xs' onClick={() => editor.chain().focus().toggleItalic().run()}>
+          <Button
+            size='xs'
+            onClick={() => editor.chain().focus().toggleItalic().run()}
+            fontStyle={editor.isActive('italic') ? 'italic' : 'normal'}
+            bg={editor.isActive('italic') ? 'gray.200' : 'transparent'}
+            color={editor.isActive('italic') ? 'black' : 'gray.600'}
+            _hover={{ bg: 'gray.300' }}>
             Italic
           </Button>
         </HStack>
