@@ -1,4 +1,4 @@
-package edu.agh.recipe.model;
+package edu.agh.recipe.recipes.model;
 
 public record RecipeStep (
     String title,

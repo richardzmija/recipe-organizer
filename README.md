@@ -36,3 +36,6 @@ Run frontend
 ```sh
 npm run run:frontend
 ```
+
+### Swagger UI
+You can access the Swagger UI by starting the backend application and going to `http://localhost:8080/swagger-ui.html`.
