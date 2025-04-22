@@ -72,10 +72,10 @@ public class DefaultRecipeService implements RecipeService {
     }
 
     private Recipe createRecipeEntity(String name, String description,
-                                     List<RecipeIngredientDTO> ingredients,
-                                     List<RecipeStepDTO> steps) {
+                                      List<RecipeIngredientDTO> ingredients,
+                                      List<RecipeStepDTO> steps) {
         List<RecipeIngredient> ingredientEntities = ingredients.stream()
-                .map(i -> new RecipeIngredient(i.ingredientName(), i.unit(), i.quantity()))
+                .map(i -> RecipeIngredient.of(i.ingredientName(), i.unit(), i.quantity()))
                 .toList();
 
         List<RecipeStep> stepEntities = steps.stream()
@@ -86,9 +86,14 @@ public class DefaultRecipeService implements RecipeService {
     }
 
     private Recipe toEntity(RecipeDTO dto) {
+        List<RecipeIngredientDTO> ingredients = dto.ingredients().stream()
+                .map(ri -> new RecipeIngredientDTO(ri.ingredientName(), ri.unit(), ri.quantity()))
+                .toList();
+
         Recipe recipe = createRecipeEntity(dto.name(), dto.description(),
-                                         dto.ingredients(), dto.steps());
+                ingredients, dto.steps());
         recipe.setId(dto.id());
+
         return recipe;
     }
 
