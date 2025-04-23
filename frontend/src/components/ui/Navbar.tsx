@@ -20,7 +20,7 @@ export default function Navbar() {
           <Button variant='ghost'>All Recipes</Button>
         </Link>
         <Link to='/recipe/create'>
-          <Button colorScheme='orange'>Create Recipe</Button>
+          <Button colorPalette='orange'>Create Recipe</Button>
         </Link>
         <ColorModeButton />
       </HStack>
