@@ -1,14 +1,20 @@
-import { Button, HStack } from '@chakra-ui/react';
-import { JSX } from '@emotion/react/jsx-runtime';
+import { Routes, Route } from 'react-router-dom';
+import Header from '@/components/common/Header';
+import OptionsBar from '@/components/common/OptionsBar';
+import HomePage from '@/pages/HomePage';
+import AddRecipePage from '@/pages/AddRecipePage';
+import { Toaster } from '@/components/ui/toaster';
 
-function App(): JSX.Element {
+function App() {
   return (
     <>
-      <div className='w-100 bg-amber-500 text-blue-600'>Test</div>
-      <HStack>
-        <Button>Click me</Button>
-        <Button>Click me</Button>
-      </HStack>
+      <Header />
+      <OptionsBar />
+      <Routes>
+        <Route path='/' element={<HomePage />} />
+        <Route path='/add' element={<AddRecipePage />} />
+      </Routes>
+      <Toaster />
     </>
   );
 }
