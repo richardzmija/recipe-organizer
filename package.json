@@ -8,10 +8,6 @@
     "setup": "npm i && npm run setup:frontend",
     "setup:frontend": "cd frontend && npm i"
   },
-  "workspaces": [
-    "frontend",
-    "backend"
-  ],
   "lint-staged": {
     "frontend/**/*.{ts,tsx,js,jsx,html,css}": [
       "npm --prefix frontend run lint",
