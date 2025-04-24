@@ -62,7 +62,18 @@ const RecipeCreateForm = ({ onCancel }: { onCancel: () => void }) => {
     }
   };
 
-  const openPreview = () => setShowPreview(true);
+  const openPreview = () => {
+    if (!name.trim() || steps.length === 0 || ingredients.length === 0) {
+      toaster.create({
+        title: 'Error',
+        description: 'Title, ingredients and steps are required to preview',
+        type: 'error',
+      });
+      return;
+    }
+    setShowPreview(true);
+  };
+
   const closePreview = () => setShowPreview(false);
 
   const previewRecipe: Recipe = {
