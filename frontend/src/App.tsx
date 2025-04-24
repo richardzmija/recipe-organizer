@@ -13,8 +13,8 @@ function App(): JSX.Element {
       <Routes>
         <Route path='/' element={<RecipeList />} />
         <Route path='/recipes' element={<RecipeList />} />
-        <Route path='/recipe/create' element={<AddRecipePage />} />
-        <Route path='/recipe/:id' element={<RecipeDetails />} />
+        <Route path='/recipes/create' element={<AddRecipePage />} />
+        <Route path='/recipes/:id' element={<RecipeDetails />} />
       </Routes>
       <Toaster />
     </>

@@ -10,9 +10,7 @@ export const RecipeContent = ({ recipe }: RecipeContentProps) => (
   <VStack align='stretch'>
     <Flex direction={{ base: 'column', md: 'row' }} align='flex-start'>
       <Box flex='2'>
-        <Heading as='h1' size='3xl' mb={1}>
-          {recipe.name}
-        </Heading>
+        <Heading as='h1' size='3xl' mb={1} dangerouslySetInnerHTML={{ __html: recipe.name }} />
 
         {recipe.tags && recipe.tags.length > 0 && (
           <HStack spaceX={2} mb={4}>
@@ -24,7 +22,7 @@ export const RecipeContent = ({ recipe }: RecipeContentProps) => (
           </HStack>
         )}
 
-        {recipe.description && <Text fontSize='md'>{recipe.description}</Text>}
+        {recipe.description && <Text fontSize='md' dangerouslySetInnerHTML={{ __html: recipe.description }} />}
       </Box>
       {recipe.image && (
         <Box flex='1'>
@@ -44,7 +42,7 @@ export const RecipeContent = ({ recipe }: RecipeContentProps) => (
           <List.Root>
             {recipe.ingredients.map((ingredient, index) => (
               <List.Item key={index}>
-                {ingredient.ingredientName} {ingredient.quantity} {ingredient.metric.toLowerCase()}
+                {ingredient.ingredientName} {ingredient.quantity} {ingredient.unit.toLowerCase()}
               </List.Item>
             ))}
           </List.Root>

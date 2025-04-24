@@ -14,7 +14,7 @@ export default function RecipeDetails() {
     const fetchRecipe = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`http://localhost:8080/recipe/${id}`);
+        const response = await fetch(`http://localhost:8080/api/recipes/${id}`);
 
         if (!response.ok) {
           if (response.status === 404) {

@@ -16,7 +16,7 @@ export default function Navbar() {
         <Link to='/recipes'>
           <Button variant='ghost'>All Recipes</Button>
         </Link>
-        <Link to='/recipe/create'>
+        <Link to='/recipes/create'>
           <Button colorPalette='orange'>Create Recipe</Button>
         </Link>
         <ColorModeButton />

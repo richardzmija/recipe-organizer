@@ -25,12 +25,15 @@ export default function StepNavigator({ steps }: StepNavigatorProps) {
 
         <Card.Root variant='outline' mb={4} width='50%' shadow='xl' size='sm'>
           <Card.Header>
-            <Heading as='p' size='xl' textAlign='center'>
-              {steps[currentStep].title}
-            </Heading>
+            <Heading
+              as='p'
+              size='xl'
+              textAlign='center'
+              dangerouslySetInnerHTML={{ __html: steps[currentStep].title }}
+            />
           </Card.Header>
           <Card.Body>
-            <Text>{steps[currentStep].text}</Text>
+            <Text dangerouslySetInnerHTML={{ __html: steps[currentStep].text }} />
           </Card.Body>
         </Card.Root>
 

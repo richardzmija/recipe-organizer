@@ -1,4 +1,5 @@
 import { Box, Button, Text, VStack, HStack } from '@chakra-ui/react';
+import { Dialog } from '@chakra-ui/react';
 import { useState } from 'react';
 import { toaster } from '@/components/ui/toaster';
 import IngredientFields from './IngredientFields';
@@ -8,6 +9,8 @@ import TagInput from './TagInput';
 import { Ingredient } from '@/types/Ingredient';
 import { Step } from '@/types/Step';
 import TextEditor from '@/components/common/TextEditor';
+import RecipeContent from '../viewinvidual/RecipeContent';
+import { Recipe } from '@/types/Recipe';
 
 const RecipeCreateForm = ({ onCancel }: { onCancel: () => void }) => {
   const [name, setName] = useState('');
@@ -16,6 +19,7 @@ const RecipeCreateForm = ({ onCancel }: { onCancel: () => void }) => {
   const [tags, setTags] = useState<string[]>([]);
   const [ingredients, setIngredients] = useState<Ingredient[]>([]);
   const [steps, setSteps] = useState<Step[]>([]);
+  const [showPreview, setShowPreview] = useState(false);
 
   const handleSave = async () => {
     if (!name.trim() || steps.length === 0 || ingredients.length === 0) {
@@ -58,7 +62,18 @@ const RecipeCreateForm = ({ onCancel }: { onCancel: () => void }) => {
     }
   };
 
-  const handlePreview = async () => {}; // todo
+  const openPreview = () => setShowPreview(true);
+  const closePreview = () => setShowPreview(false);
+
+  const previewRecipe: Recipe = {
+    id: 'preview',
+    name,
+    description,
+    image,
+    tags,
+    ingredients,
+    steps,
+  };
 
   return (
     <Box bg='white' p={6}>
@@ -94,7 +109,7 @@ const RecipeCreateForm = ({ onCancel }: { onCancel: () => void }) => {
           <Button variant='solid' bg='black' color='white' _hover={{ bg: 'gray.800' }} onClick={handleSave}>
             Save recipe
           </Button>
-          <Button variant='outline' color='black' onClick={handlePreview} _hover={{ bg: 'black', color: 'white' }}>
+          <Button variant='outline' color='black' onClick={openPreview} _hover={{ bg: 'black', color: 'white' }}>
             Show preview
           </Button>
           <Button variant='outline' color='black' onClick={onCancel} _hover={{ bg: 'black', color: 'white' }}>
@@ -102,6 +117,24 @@ const RecipeCreateForm = ({ onCancel }: { onCancel: () => void }) => {
           </Button>
         </HStack>
       </VStack>
+
+      <Dialog.Root open={showPreview}>
+        <Dialog.Backdrop />
+        <Dialog.Positioner>
+          <Dialog.Content maxW='80%' maxH='90vh' overflowY='auto'>
+            <Dialog.CloseTrigger />
+            <Dialog.Header>
+              <Dialog.Title>Recipe Preview</Dialog.Title>
+            </Dialog.Header>
+            <Dialog.Body>
+              <RecipeContent recipe={previewRecipe} />
+            </Dialog.Body>
+            <Dialog.Footer>
+              <Button onClick={closePreview}>Close</Button>
+            </Dialog.Footer>
+          </Dialog.Content>
+        </Dialog.Positioner>
+      </Dialog.Root>
     </Box>
   );
 };
