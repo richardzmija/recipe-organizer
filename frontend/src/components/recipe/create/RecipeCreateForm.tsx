@@ -30,14 +30,12 @@ const RecipeCreateForm = ({ onCancel }: { onCancel: () => void }) => {
     const payload = {
       name,
       description,
-      image,
-      tags,
       ingredients,
       steps,
     };
 
     try {
-      await fetch('http://localhost:8080/recipe', {
+      await fetch('http://localhost:8080/api/recipes', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),

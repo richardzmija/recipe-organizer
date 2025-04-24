@@ -16,7 +16,7 @@ const IngredientFields = ({ ingredients, onChange }: Props) => {
   };
 
   const handleAdd = () => {
-    onChange([...ingredients, { ingredientName: '', metric: 'GRAMS', quantity: 0 }]);
+    onChange([...ingredients, { ingredientName: '', unit: 'GRAMS', quantity: 0 }]);
   };
 
   const handleRemove = (index: number) => {
@@ -35,7 +35,7 @@ const IngredientFields = ({ ingredients, onChange }: Props) => {
             onChange={(e) => handleChange(i, 'ingredientName', e.target.value)}
           />
 
-          <MetricSelect value={ingredient.metric} onChange={(val) => handleChange(i, 'metric', val)} />
+          <MetricSelect value={ingredient.unit} onChange={(val) => handleChange(i, 'unit', val)} />
 
           <NumberInput.Root
             min={0}
