@@ -20,9 +20,7 @@ const RecipeCard = ({ recipe }: RecipeCardProps) => {
         width='100%'>
         <Flex direction={{ base: 'column', md: 'row' }} align='flex-start'>
           <Box flex='2'>
-            <Heading as='h3' size='xl' mb={1}>
-              {recipe.name}
-            </Heading>
+            <Heading as='h3' size='xl' mb={1} dangerouslySetInnerHTML={{ __html: recipe.name }} />
 
             {recipe.tags && recipe.tags.length > 0 && (
               <HStack gap={2} mb={4}>
@@ -34,7 +32,7 @@ const RecipeCard = ({ recipe }: RecipeCardProps) => {
               </HStack>
             )}
 
-            {recipe.description && <Text fontSize='md'>{recipe.description}</Text>}
+            {recipe.description && <Text fontSize='md' dangerouslySetInnerHTML={{ __html: recipe.description }} />}
 
             {recipe.ingredients && recipe.ingredients.length > 0 && (
               <Box mt={3} mb={2}>
