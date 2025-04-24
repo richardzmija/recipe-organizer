@@ -1,1 +1,62 @@
 @import 'tailwindcss';
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  @apply bg-gray-200;
+}
+
+.tiptap-editor {
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  line-height: 1.4;
+  font-size: 14px;
+  color: black;
+}
+
+.tiptap-editor p.is-editor-empty:first-child::before {
+  color: #999;
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  pointer-events: none;
+  font-style: italic;
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+.tiptap-editor p {
+  margin: 0;
+}
+
+.tiptap-editor ul {
+  list-style-type: disc;
+  margin-left: 1.5em;
+  padding-left: 0;
+}
+.tiptap-editor ol {
+  list-style-type: decimal;
+  margin-left: 1.5em;
+  padding-left: 0;
+}
+.tiptap-editor li {
+  margin-bottom: 0.25em;
+}
+
+.preview-box ol {
+  list-style-type: decimal;
+  margin-left: 1.5em;
+  padding-left: 0;
+}
+
+.preview-box ul {
+  list-style-type: disc;
+  margin-left: 1.5em;
+  padding-left: 0;
+}
+
+.preview-box li {
+  margin-bottom: 0.25em;
+}

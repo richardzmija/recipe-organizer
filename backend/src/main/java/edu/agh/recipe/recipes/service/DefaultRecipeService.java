@@ -93,7 +93,6 @@ public class DefaultRecipeService implements RecipeService {
         Recipe recipe = createRecipeEntity(dto.name(), dto.description(),
                 ingredients, dto.steps());
         recipe.setId(dto.id());
-
         return recipe;
     }
 
