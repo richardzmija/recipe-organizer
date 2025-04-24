@@ -13,6 +13,7 @@ import org.springframework.context.annotation.Profile;
 import java.util.*;
 
 @Configuration
+@Profile("dev")
 public class RecipeDataSeeder {
 
     private final Random random = new Random();
@@ -183,7 +184,6 @@ public class RecipeDataSeeder {
     }
     
     @Bean
-    @Profile("dev")
     public CommandLineRunner seedDatabaseWithRecipes(RecipeRepository recipeRepository) {
         return args -> {
             // Check if we need to seed the database
