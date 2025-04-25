@@ -1,5 +1,20 @@
-import React from 'react';
-import { Box, Text, Heading, HStack, Button, Flex, Input, Badge, Wrap, WrapItem } from '@chakra-ui/react';
+import React, { useRef } from 'react';
+import {
+  Box,
+  Text,
+  Heading,
+  HStack,
+  Button,
+  Flex,
+  Input,
+  Badge,
+  Wrap,
+  WrapItem,
+  Dialog,
+  Portal,
+  CloseButton,
+} from '@chakra-ui/react';
+import { toaster } from '@/components/ui/toaster';
 
 interface FilterParams {
   page: number;
@@ -17,6 +32,8 @@ interface FilterControlsProps {
   addIngredient: () => void;
   removeIngredient: (ingredient: string) => void;
   clearFilters: () => void;
+  deleteRecipe: (id: string) => void;
+  selectedIds: string[];
 }
 
 const FilterControls = ({
@@ -27,7 +44,51 @@ const FilterControls = ({
   addIngredient,
   removeIngredient,
   clearFilters,
+  selectedIds,
+  deleteRecipe,
 }: FilterControlsProps) => {
+  const closeRef = useRef<HTMLButtonElement>(null);
+  const handleDeleteSelected = async () => {
+    try {
+      const deleteRequests = selectedIds.map((id) =>
+        fetch(`http://localhost:8080/api/recipes/${id}`, {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }),
+      );
+
+      const responses = await Promise.all(deleteRequests);
+
+      responses.forEach((res, index) => {
+        if (!res.ok) {
+          toaster.create({
+            title: 'Delete error',
+            description: `There was a problem with deleting a recipe ${selectedIds[index]}`,
+            type: 'error',
+          });
+        } else {
+          toaster.create({
+            title: 'Delete success',
+            description: `Recipe ${selectedIds[index]} deleted`,
+            type: 'success',
+          });
+          deleteRecipe(selectedIds[index]);
+        }
+      });
+    } catch (error) {
+      console.error('Error deleting recipes:', error);
+      toaster.create({
+        title: 'Delete error',
+        description: `There was a problem with deleting a recipes`,
+        type: 'error',
+      });
+    } finally {
+      if (closeRef && closeRef.current) closeRef.current.click();
+    }
+  };
+
   return (
     <Box borderWidth='1px' borderRadius='md' p={4} mb={4} bg='bg.surface' shadow='sm'>
       <Heading as='h3' size='md' mb={4}>
@@ -91,6 +152,43 @@ const FilterControls = ({
             </Button>
           </Flex>
         </Box>
+
+        <Dialog.Root>
+          <Dialog.Trigger asChild>
+            <Box>
+              <Button colorPalette={'red'} variant={'surface'} disabled={!(selectedIds.length > 0)}>
+                Delete selected
+              </Button>
+            </Box>
+          </Dialog.Trigger>
+          <Portal>
+            <Dialog.Backdrop />
+            <Dialog.Positioner>
+              <Dialog.Content>
+                <Dialog.Header>
+                  <Dialog.Title>Delete</Dialog.Title>
+                </Dialog.Header>
+                <Dialog.Body>
+                  <p>
+                    Are you sure to delete {selectedIds.length} recipe{selectedIds.length === 1 ? '' : 's'}?
+                  </p>
+                  <p>
+                    This action is <b>irreversable.</b>
+                  </p>
+                </Dialog.Body>
+                <Dialog.Footer>
+                  <Dialog.ActionTrigger asChild>
+                    <Button variant='outline'>Cancel</Button>
+                  </Dialog.ActionTrigger>
+                  <Button onClick={() => handleDeleteSelected()}>Delete</Button>
+                </Dialog.Footer>
+                <Dialog.CloseTrigger asChild>
+                  <CloseButton size='sm' ref={closeRef} />
+                </Dialog.CloseTrigger>
+              </Dialog.Content>
+            </Dialog.Positioner>
+          </Portal>
+        </Dialog.Root>
 
         {filterParams.ingredients.length > 0 && (
           <Button colorPalette='red' variant='outline' onClick={clearFilters}>

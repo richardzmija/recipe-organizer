@@ -1,17 +1,76 @@
-import { Link } from 'react-router-dom';
-import { Box, Flex, Heading, Text, HStack, Badge, IconButton, Separator, VStack } from '@chakra-ui/react';
+import { useNavigate } from 'react-router-dom';
+import {
+  Box,
+  Flex,
+  Heading,
+  Text,
+  HStack,
+  Badge,
+  IconButton,
+  Separator,
+  VStack,
+  Dialog,
+  Button,
+  CloseButton,
+  Portal,
+  Checkbox,
+} from '@chakra-ui/react';
 import { Recipe } from '../../../types/Recipe';
 import { FaEdit } from 'react-icons/fa';
 import { MdDeleteForever } from 'react-icons/md';
+import { toaster } from '@/components/ui/toaster';
+import { useRef } from 'react';
 
 interface RecipeCardProps {
   recipe: Recipe;
+  onDelete: () => void;
+  onSelect: () => void;
+  onUnselect: () => void;
 }
 
-const RecipeCard = ({ recipe }: RecipeCardProps) => {
+const RecipeCard = ({ recipe, onDelete, onSelect, onUnselect }: RecipeCardProps) => {
+  const navigate = useNavigate();
+  const closeRef = useRef<HTMLButtonElement>(null);
+
+  const handleCardClick = () => {
+    navigate(`/recipes/${recipe.id}`);
+  };
+
+  const handleEditIconClick = () => {
+    navigate(`recipes/edit/${recipe.id}`);
+  };
+
+  const handleDeleteConfirmation = async (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.stopPropagation();
+    try {
+      await fetch(`http://localhost:8080/api/recipes/${recipe.id}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      toaster.create({
+        title: 'Success',
+        description: 'Recipe deleted successfully',
+        type: 'success',
+      });
+      onDelete();
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    } catch (error) {
+      toaster.create({
+        title: 'Delete error',
+        description: 'There was a problem with deleting a recipe',
+        type: 'error',
+      });
+    } finally {
+      if (closeRef && closeRef.current) closeRef.current.click();
+    }
+  };
+
   return (
-    <Link key={recipe.id} to={`/recipes/${recipe.id}`}>
       <Box
+        className='cursor-pointer'
+        onClick={handleCardClick}
         p={6}
         borderWidth='1px'
         borderRadius='md'
@@ -77,20 +136,73 @@ const RecipeCard = ({ recipe }: RecipeCardProps) => {
             </Box>
           )}
           <Separator size={'md'} orientation={'vertical'} marginLeft={3} marginRight={3} alignSelf={'stretch'} />
-          <VStack>
-            <Link to={`/recipes/edit/${recipe.id}`}>
-              <IconButton size={'xs'}>
-                <FaEdit />
-              </IconButton>
-            </Link>
-            <IconButton size={'xs'}>
-              <MdDeleteForever />
+          <VStack alignSelf={'stretch'}>
+            <IconButton
+              onClick={(e) => {
+                e.stopPropagation();
+                handleEditIconClick();
+              }}
+              size={'xs'}>
+              <FaEdit />
             </IconButton>
+
+            <Dialog.Root>
+              <Dialog.Trigger asChild>
+                <IconButton
+                  onClick={(e) => {
+                    e.stopPropagation();
+                  }}
+                  size={'xs'}>
+                  <MdDeleteForever />
+                </IconButton>
+              </Dialog.Trigger>
+              <Portal>
+                <Dialog.Backdrop />
+                <Dialog.Positioner>
+                  <Dialog.Content>
+                    <Dialog.Header>
+                      <Dialog.Title>Delete</Dialog.Title>
+                    </Dialog.Header>
+                    <Dialog.Body>
+                      <p>Are you sure to delete this recipe?</p>
+                      <p>
+                        This action is <b>irreversable.</b>
+                      </p>
+                    </Dialog.Body>
+                    <Dialog.Footer>
+                      <Dialog.ActionTrigger asChild>
+                        <Button onClick={(e) => e.stopPropagation()} variant='outline'>
+                          Cancel
+                        </Button>
+                      </Dialog.ActionTrigger>
+                      <Button onClick={(e) => handleDeleteConfirmation(e)}>Delete</Button>
+                    </Dialog.Footer>
+                    <Dialog.CloseTrigger asChild>
+                      <CloseButton size='sm' ref={closeRef} />
+                    </Dialog.CloseTrigger>
+                  </Dialog.Content>
+                </Dialog.Positioner>
+              </Portal>
+            </Dialog.Root>
+            <Checkbox.Root
+              size={'md'}
+              colorPalette='yellow'
+              variant='subtle'
+              onClick={(e) => e.stopPropagation()}
+              className='cursor-pointer'
+              style={{ marginTop: 'auto' }}
+              onCheckedChange={(details) => {
+                if (details.checked) onSelect();
+                else onUnselect();
+              }}>
+              <Checkbox.HiddenInput />
+              <Checkbox.Control />
+            </Checkbox.Root>
           </VStack>
         </Flex>
       </Box>
       <Box borderBottom='1px' borderColor='gray.200' my={2} />
-    </Link>
+    </>
   );
 };
 
