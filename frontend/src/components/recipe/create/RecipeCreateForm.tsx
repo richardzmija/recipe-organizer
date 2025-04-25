@@ -132,6 +132,7 @@ const RecipeCreateForm: FC<Props> = (props: Props) => {
             Save recipe
           </Button>
           <Button variant='outline' onClick={openPreview}>
+
             Show preview
           </Button>
           <Button variant='outline' onClick={onCancel}>
