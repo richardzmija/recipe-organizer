@@ -1,6 +1,4 @@
 @import 'tailwindcss';
-@tailwind base;
-@tailwind components;
 @tailwind utilities;
 
 .tiptap-editor {
@@ -9,7 +7,6 @@
   word-break: break-word;
   line-height: 1.4;
   font-size: 14px;
-  color: black;
 }
 
 .tiptap-editor p.is-editor-empty:first-child::before {

@@ -1,4 +1,4 @@
-import { Box, Button, Text, VStack, HStack } from '@chakra-ui/react';
+import { Box, Button, Text, VStack, HStack, Input } from '@chakra-ui/react';
 import { Dialog } from '@chakra-ui/react';
 import { useState } from 'react';
 import { toaster } from '@/components/ui/toaster';
@@ -87,43 +87,33 @@ const RecipeCreateForm = ({ onCancel }: { onCancel: () => void }) => {
   };
 
   return (
-    <Box bg='white' p={6}>
+    <Box p={6}>
       <VStack align='start' w='100%'>
-        <Text fontWeight='bold' color='black'>
-          Recipe title
-        </Text>
-        <TextEditor value={name} onChange={setName} />
+        <Text fontWeight='bold'>Recipe title</Text>
+        <Input value={name} onChange={(e) => setName(e.target.value)} />
 
-        <Text fontWeight='bold' color='black'>
-          Description
-        </Text>
+        <Text fontWeight='bold'>Description</Text>
         <TextEditor value={description} onChange={setDescription} height='150px' />
 
         <ImageInput value={image} onChange={setImage} />
 
-        <Text fontWeight='bold' color='black'>
-          Tags
-        </Text>
+        <Text fontWeight='bold'>Tags</Text>
         <TagInput tags={tags} onChange={setTags} />
 
-        <Text fontWeight='bold' color='black'>
-          Ingredients
-        </Text>
+        <Text fontWeight='bold'>Ingredients</Text>
         <IngredientFields ingredients={ingredients} onChange={setIngredients} />
 
-        <Text fontWeight='bold' color='black'>
-          Steps
-        </Text>
+        <Text fontWeight='bold'>Steps</Text>
         <StepFields steps={steps} onChange={setSteps} />
 
         <HStack pt={4}>
-          <Button variant='solid' bg='black' color='white' _hover={{ bg: 'gray.800' }} onClick={handleSave}>
+          <Button variant='solid' onClick={handleSave}>
             Save recipe
           </Button>
-          <Button variant='outline' color='black' onClick={openPreview} _hover={{ bg: 'black', color: 'white' }}>
+          <Button variant='outline' onClick={openPreview}>
             Show preview
           </Button>
-          <Button variant='outline' color='black' onClick={onCancel} _hover={{ bg: 'black', color: 'white' }}>
+          <Button variant='outline' onClick={onCancel}>
             Cancel
           </Button>
         </HStack>

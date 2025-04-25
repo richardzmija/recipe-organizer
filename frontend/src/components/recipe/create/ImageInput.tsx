@@ -34,7 +34,7 @@ const ImageInput = ({ value, onChange }: Props) => {
 
   return (
     <Box>
-      <Text fontWeight='bold' color='black' mb={2}>
+      <Text fontWeight='bold' mb={2}>
         Image
       </Text>
 
@@ -45,7 +45,6 @@ const ImageInput = ({ value, onChange }: Props) => {
           px={3}
           py={2}
           fontSize='sm'
-          color='gray.500'
           cursor='pointer'
           display='flex'
           alignItems='center'

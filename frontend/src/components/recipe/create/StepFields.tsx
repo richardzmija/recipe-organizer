@@ -51,13 +51,7 @@ const StepFields = ({ steps, onChange }: Props) => {
         </HStack>
       ))}
 
-      <Button
-        size='sm'
-        onClick={handleAdd}
-        variant='outline'
-        color='black'
-        _hover={{ bg: 'black', color: 'white' }}
-        alignSelf='flex-start'>
+      <Button size='sm' onClick={handleAdd} variant='outline' alignSelf='flex-start'>
         + Add step
       </Button>
     </VStack>

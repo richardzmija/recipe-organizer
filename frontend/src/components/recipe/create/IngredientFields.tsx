@@ -30,7 +30,6 @@ const IngredientFields = ({ ingredients, onChange }: Props) => {
         <HStack key={i} gap={3}>
           <Input
             placeholder='Ingredient'
-            color='black'
             value={ingredient.ingredientName}
             onChange={(e) => handleChange(i, 'ingredientName', e.target.value)}
           />
@@ -46,22 +45,16 @@ const IngredientFields = ({ ingredients, onChange }: Props) => {
             size='xs'
             width='170px'>
             <NumberInput.Control />
-            <NumberInput.Input color='black' />
+            <NumberInput.Input />
           </NumberInput.Root>
 
-          <IconButton aria-label='Delete ingredient' variant='outline' color='black' onClick={() => handleRemove(i)}>
+          <IconButton aria-label='Delete ingredient' variant='outline' onClick={() => handleRemove(i)}>
             <LuTrash2 />
           </IconButton>
         </HStack>
       ))}
 
-      <Button
-        size='sm'
-        onClick={handleAdd}
-        variant='outline'
-        color='black'
-        _hover={{ bg: 'black', color: 'white' }}
-        alignSelf='flex-start'>
+      <Button size='sm' onClick={handleAdd} variant='outline' alignSelf='flex-start'>
         + Add ingredient
       </Button>
     </VStack>
