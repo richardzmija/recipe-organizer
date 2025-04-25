@@ -13,6 +13,7 @@ import {
   Button,
   CloseButton,
   Portal,
+  Checkbox,
 } from '@chakra-ui/react';
 import { Recipe } from '../../../types/Recipe';
 import { FaEdit } from 'react-icons/fa';
@@ -23,9 +24,11 @@ import { useRef } from 'react';
 interface RecipeCardProps {
   recipe: Recipe;
   onDelete: () => void;
+  onSelect: () => void;
+  onUnselect: () => void;
 }
 
-const RecipeCard = ({ recipe, onDelete }: RecipeCardProps) => {
+const RecipeCard = ({ recipe, onDelete, onSelect, onUnselect }: RecipeCardProps) => {
   const navigate = useNavigate();
   const closeRef = useRef<HTMLButtonElement>(null);
 
@@ -134,7 +137,7 @@ const RecipeCard = ({ recipe, onDelete }: RecipeCardProps) => {
             </Box>
           )}
           <Separator size={'md'} orientation={'vertical'} marginLeft={3} marginRight={3} alignSelf={'stretch'} />
-          <VStack>
+          <VStack alignSelf={'stretch'}>
             <IconButton
               onClick={(e) => {
                 e.stopPropagation();
@@ -182,6 +185,20 @@ const RecipeCard = ({ recipe, onDelete }: RecipeCardProps) => {
                 </Dialog.Positioner>
               </Portal>
             </Dialog.Root>
+            <Checkbox.Root
+              size={'md'}
+              colorPalette='yellow'
+              variant='subtle'
+              onClick={(e) => e.stopPropagation()}
+              className='cursor-pointer'
+              style={{ marginTop: 'auto' }}
+              onCheckedChange={(details) => {
+                if (details.checked) onSelect();
+                else onUnselect();
+              }}>
+              <Checkbox.HiddenInput />
+              <Checkbox.Control />
+            </Checkbox.Root>
           </VStack>
         </Flex>
       </Box>
