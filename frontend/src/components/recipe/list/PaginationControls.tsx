@@ -1,4 +1,3 @@
-import React from 'react';
 import { HStack, Button, Text } from '@chakra-ui/react';
 
 interface PaginationProps {

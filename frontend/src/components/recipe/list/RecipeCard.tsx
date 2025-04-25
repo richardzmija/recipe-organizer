@@ -1,7 +1,8 @@
-import React from 'react';
 import { Link } from 'react-router-dom';
-import { Box, Flex, Heading, Text, HStack, Badge } from '@chakra-ui/react';
+import { Box, Flex, Heading, Text, HStack, Badge, IconButton, Separator, VStack } from '@chakra-ui/react';
 import { Recipe } from '../../../types/Recipe';
+import { FaEdit } from 'react-icons/fa';
+import { MdDeleteForever } from 'react-icons/md';
 
 interface RecipeCardProps {
   recipe: Recipe;
@@ -75,6 +76,17 @@ const RecipeCard = ({ recipe }: RecipeCardProps) => {
               />
             </Box>
           )}
+          <Separator size={'md'} orientation={'vertical'} marginLeft={3} marginRight={3} alignSelf={'stretch'} />
+          <VStack>
+            <Link to={`/recipes/edit/${recipe.id}`}>
+              <IconButton size={'xs'}>
+                <FaEdit />
+              </IconButton>
+            </Link>
+            <IconButton size={'xs'}>
+              <MdDeleteForever />
+            </IconButton>
+          </VStack>
         </Flex>
       </Box>
       <Box borderBottom='1px' borderColor='gray.200' my={2} />

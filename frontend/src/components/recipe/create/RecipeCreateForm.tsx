@@ -1,6 +1,6 @@
-import { Box, Button, Text, VStack, HStack } from '@chakra-ui/react';
+import { Box, Button, Text, VStack, HStack, Input } from '@chakra-ui/react';
 import { Dialog } from '@chakra-ui/react';
-import { useState } from 'react';
+import { FC, useState } from 'react';
 import { toaster } from '@/components/ui/toaster';
 import IngredientFields from './IngredientFields';
 import StepFields from './StepFields';
@@ -12,14 +12,27 @@ import TextEditor from '@/components/common/TextEditor';
 import RecipeContent from '../viewinvidual/RecipeContent';
 import { Recipe } from '@/types/Recipe';
 
-const RecipeCreateForm = ({ onCancel }: { onCancel: () => void }) => {
-  const [name, setName] = useState('');
-  const [description, setDescription] = useState('');
-  const [image, setImage] = useState('');
-  const [tags, setTags] = useState<string[]>([]);
-  const [ingredients, setIngredients] = useState<Ingredient[]>([]);
-  const [steps, setSteps] = useState<Step[]>([]);
+interface Props {
+  id?: string;
+  name?: string;
+  description?: string;
+  image?: string;
+  tags?: string[];
+  ingredients?: Ingredient[];
+  steps?: Step[];
+  onCancel: () => void;
+  mode: 'edit' | 'create';
+}
+
+const RecipeCreateForm: FC<Props> = (props: Props) => {
+  const [name, setName] = useState(props.name || '');
+  const [description, setDescription] = useState(props.description || '');
+  const [image, setImage] = useState(props.image || '');
+  const [tags, setTags] = useState<string[]>(props.tags || []);
+  const [ingredients, setIngredients] = useState<Ingredient[]>(props.ingredients || []);
+  const [steps, setSteps] = useState<Step[]>(props.steps || []);
   const [showPreview, setShowPreview] = useState(false);
+  const { onCancel, mode } = props;
 
   const handleSave = async () => {
     if (!name.trim() || steps.length === 0 || ingredients.length === 0) {
@@ -39,15 +52,23 @@ const RecipeCreateForm = ({ onCancel }: { onCancel: () => void }) => {
     };
 
     try {
-      await fetch('http://localhost:8080/api/recipes', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
+      if (mode === 'create')
+        await fetch('http://localhost:8080/api/recipes', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+
+      if (mode === 'edit')
+        await fetch(`http://localhost:8080/api/recipes/${props.id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
 
       toaster.create({
         title: 'Success',
-        description: 'Recipe has been saved',
+        description: mode === 'create' ? 'Recipe has been saved' : 'Recipe has been updated',
         type: 'success',
       });
 
@@ -55,7 +76,7 @@ const RecipeCreateForm = ({ onCancel }: { onCancel: () => void }) => {
     } catch (error) {
       toaster.create({
         title: 'Saving failed',
-        description: "Recipe couldn't be saved",
+        description: mode === 'create' ? "Recipe couldn't be saved" : "Recipe couldn't be saved",
         type: 'error',
       });
       console.error('Save error:', error);
@@ -87,43 +108,34 @@ const RecipeCreateForm = ({ onCancel }: { onCancel: () => void }) => {
   };
 
   return (
-    <Box bg='white' p={6}>
+    <Box p={6}>
       <VStack align='start' w='100%'>
-        <Text fontWeight='bold' color='black'>
-          Recipe title
-        </Text>
-        <TextEditor value={name} onChange={setName} />
+        <Text fontWeight='bold'>Recipe title</Text>
+        <Input value={name} onChange={(e) => setName(e.target.value)} />
 
-        <Text fontWeight='bold' color='black'>
-          Description
-        </Text>
+        <Text fontWeight='bold'>Description</Text>
         <TextEditor value={description} onChange={setDescription} height='150px' />
 
         <ImageInput value={image} onChange={setImage} />
 
-        <Text fontWeight='bold' color='black'>
-          Tags
-        </Text>
+        <Text fontWeight='bold'>Tags</Text>
         <TagInput tags={tags} onChange={setTags} />
 
-        <Text fontWeight='bold' color='black'>
-          Ingredients
-        </Text>
+        <Text fontWeight='bold'>Ingredients</Text>
         <IngredientFields ingredients={ingredients} onChange={setIngredients} />
 
-        <Text fontWeight='bold' color='black'>
-          Steps
-        </Text>
+        <Text fontWeight='bold'>Steps</Text>
         <StepFields steps={steps} onChange={setSteps} />
 
         <HStack pt={4}>
-          <Button variant='solid' bg='black' color='white' _hover={{ bg: 'gray.800' }} onClick={handleSave}>
+          <Button variant='solid' onClick={handleSave}>
             Save recipe
           </Button>
-          <Button variant='outline' color='black' onClick={openPreview} _hover={{ bg: 'black', color: 'white' }}>
+          <Button variant='outline' onClick={openPreview}>
+
             Show preview
           </Button>
-          <Button variant='outline' color='black' onClick={onCancel} _hover={{ bg: 'black', color: 'white' }}>
+          <Button variant='outline' onClick={onCancel}>
             Cancel
           </Button>
         </HStack>

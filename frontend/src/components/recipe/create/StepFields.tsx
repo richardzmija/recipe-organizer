@@ -42,7 +42,6 @@ const StepFields = ({ steps, onChange }: Props) => {
           <IconButton
             aria-label='Remove step'
             variant='outline'
-            color='black'
             onClick={() => handleRemove(i)}
             alignSelf='start'
             minH='77px'>
@@ -51,13 +50,7 @@ const StepFields = ({ steps, onChange }: Props) => {
         </HStack>
       ))}
 
-      <Button
-        size='sm'
-        onClick={handleAdd}
-        variant='outline'
-        color='black'
-        _hover={{ bg: 'black', color: 'white' }}
-        alignSelf='flex-start'>
+      <Button size='sm' onClick={handleAdd} variant='outline' alignSelf='flex-start'>
         + Add step
       </Button>
     </VStack>
