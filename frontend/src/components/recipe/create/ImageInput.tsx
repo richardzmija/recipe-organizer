@@ -52,17 +52,15 @@ const ImageInput = ({ value, onChange }: Props) => {
           onClick={openFileDialog}
           minW='220px'>
           <LuUpload />
-          <Text color='black'>Upload image</Text>
+          <Text>Upload image</Text>
         </Box>
 
         <Input type='file' accept='image/*' onChange={handleFileChange} ref={fileInputRef} display='none' />
 
         {value && fileName && (
           <Flex align='center' gap={2}>
-            <Text color='black' fontSize='sm'>
-              {fileName}
-            </Text>
-            <IconButton aria-label='Remove image' variant='ghost' color='black' onClick={clearImage}>
+            <Text fontSize='sm'>{fileName}</Text>
+            <IconButton aria-label='Remove image' variant='ghost' onClick={clearImage}>
               <LuX />
             </IconButton>
           </Flex>

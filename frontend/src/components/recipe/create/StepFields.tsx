@@ -42,7 +42,6 @@ const StepFields = ({ steps, onChange }: Props) => {
           <IconButton
             aria-label='Remove step'
             variant='outline'
-            color='black'
             onClick={() => handleRemove(i)}
             alignSelf='start'
             minH='77px'>
