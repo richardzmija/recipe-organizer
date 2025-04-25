@@ -28,4 +28,8 @@ public interface RecipeService {
      */
     Page<RecipeDTO> findRecipesContainingAllIngredients(List<String> ingredientName, Pageable pageable);
 
+    /**
+     * Finds recipes whose names start with the given query, case-insensitively.
+     */
+    Page<RecipeDTO> suggestRecipesByName(String nameQuery, Pageable pageable);
 }

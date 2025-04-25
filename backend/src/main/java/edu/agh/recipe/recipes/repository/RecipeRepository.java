@@ -19,4 +19,11 @@ public interface RecipeRepository extends MongoRepository<Recipe, String> {
      */
     @Query("{ 'ingredients.ingredientName': { $all: ?0 } }")
     Page<Recipe> findByAllIngredientsContaining(List<String> ingredientNames, Pageable pageable);
+
+    /**
+     * Finds recipes whose names start with the given prefix, case-insensitively.
+     * It is used for search suggestions.
+     */
+    @Query("{ 'name':  { $regex: '^?0', $options:  'i' } }")
+    Page<Recipe> findByNameStartingWithIgnoreCase(String namePrefix, Pageable pageable);
 }
