@@ -9,7 +9,7 @@ interface RecipeCardProps {
 
 const RecipeCard = ({ recipe }: RecipeCardProps) => {
   return (
-    <Link key={recipe.id} to={`/recipe/${recipe.id}`}>
+    <Link key={recipe.id} to={`/recipes/${recipe.id}`}>
       <Box
         p={6}
         borderWidth='1px'
