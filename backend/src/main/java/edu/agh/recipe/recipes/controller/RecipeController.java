@@ -75,25 +75,57 @@ public class RecipeController {
     }
 
     @Operation(
-            summary = "Filter recipes by ingredients.",
-            description = "Returns a paginated list of recipes that contain any of the specified ingredients."
+            summary = "Filter recipes by any ingredient.",
+            description = "Returns a paginated list of recipes that contain *any* of the specified ingredients."
     )
     @ApiResponse(
             responseCode = "200",
             description = "Successfully retrieved filtered recipes",
             content = @Content(schema = @Schema(implementation = Page.class))
     )
-    @GetMapping("/filter")
-    public ResponseEntity<Page<RecipeDTO>> getRecipesByIngredients(
+    @GetMapping("/filter/any")
+    public ResponseEntity<Page<RecipeDTO>> getRecipesByAnyIngredient(
+            @Parameter(description = "List of ingredient names to match any", required = true)
             @RequestParam List<String> ingredients,
+            @Parameter(description = "Page number (zero-based)")
             @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "Number of items per page")
             @RequestParam(defaultValue = "10") int size,
+            @Parameter(description = "Sort field")
             @RequestParam(defaultValue = "name") String sort,
+            @Parameter(description = "Sort direction (asc/desc)")
             @RequestParam(defaultValue = "asc") String direction
     ) {
         Sort.Direction sortDirection = Sort.Direction.fromString(direction);
         Pageable pageable = PageRequest.of(page, size, Sort.by(sortDirection, sort));
-        return ResponseEntity.ok(recipeService.getRecipesByIngredients(ingredients, pageable));
+        return ResponseEntity.ok(recipeService.findRecipesContainingAnyIngredients(ingredients, pageable));
+    }
+
+    @Operation(
+            summary = "Filter recipes by all ingredients.",
+            description = "Returns a paginated list of recipes that contain *all* of the specified ingredients."
+    )
+    @ApiResponse(
+            responseCode = "200",
+            description = "Successfully retrieved filtered recipes",
+            content = @Content(schema = @Schema(implementation = Page.class))
+    )
+    @GetMapping("/filter/all")
+    public ResponseEntity<Page<RecipeDTO>> getRecipesByAllIngredients(
+            @Parameter(description = "List of ingredient names to match all", required = true)
+            @RequestParam List<String> ingredients,
+            @Parameter(description = "Page number (zero-based)")
+            @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "Number of items per page")
+            @RequestParam(defaultValue = "10") int size,
+            @Parameter(description = "Sort field")
+            @RequestParam(defaultValue = "name") String sort,
+            @Parameter(description = "Sort direction (asc/desc)")
+            @RequestParam(defaultValue = "asc") String direction
+    ) {
+        Sort.Direction sortDirection = Sort.Direction.fromString(direction);
+        Pageable pageable = PageRequest.of(page, size, Sort.by(sortDirection, sort));
+        return ResponseEntity.ok(recipeService.findRecipesContainingAllIngredients(ingredients, pageable));
     }
 
     @Operation(

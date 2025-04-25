@@ -16,6 +16,16 @@ public interface RecipeService {
     RecipeDTO updateRecipe(String id, @Valid UpdateRecipeDTO dto);
     void deleteRecipe(String id);
 
-    Page<RecipeDTO> getRecipesByIngredients(List<String> ingredients, Pageable pageable);
+    /**
+     * Finds recipes containing *any* of the specified ingredients.
+     * Ingredient names are matched case-insensitively.
+     */
+    Page<RecipeDTO> findRecipesContainingAnyIngredients(List<String> ingredients, Pageable pageable);
+
+    /**
+     * Finds recipes that contain *all* of the specified ingredients.
+     * Ingredient names are matched case-insensitively.
+     */
+    Page<RecipeDTO> findRecipesContainingAllIngredients(List<String> ingredientName, Pageable pageable);
 
 }
