@@ -68,6 +68,7 @@ const RecipeCard = ({ recipe, onDelete, onSelect, onUnselect }: RecipeCardProps)
   };
 
   return (
+    <>
       <Box
         className='cursor-pointer'
         onClick={handleCardClick}
