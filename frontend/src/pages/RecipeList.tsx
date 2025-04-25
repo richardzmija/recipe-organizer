@@ -99,6 +99,10 @@ export default function RecipeList() {
     });
   };
 
+  const handleOnRecipeDelete = (id: string) => {
+    setRecipes((prev) => prev.filter((r) => r.id !== id));
+  };
+
   const addIngredient = () => {
     if (newIngredient.trim() !== '' && !filterParams.ingredients.includes(newIngredient.trim())) {
       setFilterParams({
@@ -201,7 +205,13 @@ export default function RecipeList() {
         ) : (
           <VStack align='stretch'>
             {recipes.map((recipe) => (
-              <RecipeCard key={recipe.id} recipe={recipe} />
+              <RecipeCard
+                key={recipe.id}
+                recipe={recipe}
+                onDelete={() => {
+                  if (recipe.id) handleOnRecipeDelete(recipe.id);
+                }}
+              />
             ))}
           </VStack>
         )}
