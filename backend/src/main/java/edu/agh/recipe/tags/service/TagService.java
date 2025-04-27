@@ -11,6 +11,7 @@ public interface TagService {
     Page<TagDTO> getAllTags(Pageable pageable);
     TagDTO getTagById(String id);
     TagDTO getTagByName(String name);
+    boolean existsByTagName(String name);
     TagDTO createTag(CreateTagDTO createTagDTO);
     TagDTO updateTag(String id, CreateTagDTO updateTagDTO);
     void deleteTag(String id);

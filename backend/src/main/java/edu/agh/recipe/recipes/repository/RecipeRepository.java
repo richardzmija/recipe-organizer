@@ -5,6 +5,7 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
 import org.springframework.stereotype.Repository;
 import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -26,4 +27,22 @@ public interface RecipeRepository extends MongoRepository<Recipe, String> {
      */
     @Query("{ 'name':  { $regex: '^?0', $options:  'i' } }")
     Page<Recipe> findByNameStartingWithIgnoreCase(String namePrefix, Pageable pageable);
+
+    /**
+     * Find recipes by tag id.
+     */
+    Page<Recipe> findByTagIdsContaining(String tagId, Pageable pageable);
+
+    /**
+     * Find recipes with any of the given tag ids.
+     */
+    @Query("{ 'tagIds': { $in: ?0 } }")
+    Page<Recipe> findByTagIdsIn(List<String> tagIds, Pageable pageable);
+
+    /**
+     * Find recipes with all the given tag ids.
+     */
+    @Query("{ 'tagIds': { $all: ?0 } }")
+    Page<Recipe> findByTagIdsAll(List<String> tagIds, Pageable pageable);
+
 }

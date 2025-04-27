@@ -54,6 +54,11 @@ public class DefaultTagService implements TagService {
     }
 
     @Override
+    public boolean existsByTagName(String name) {
+        return tagRepository.existsByName(name);
+    }
+
+    @Override
     public TagDTO createTag(@Valid CreateTagDTO createTagDTO) {
         if (tagRepository.existsByName(createTagDTO.name())) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Tag with this name already exists.");

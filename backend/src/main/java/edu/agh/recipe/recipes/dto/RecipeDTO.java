@@ -1,13 +1,16 @@
 package edu.agh.recipe.recipes.dto;
 
 import edu.agh.recipe.recipes.model.Recipe;
+import edu.agh.recipe.tags.dto.TagDTO;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public record RecipeDTO(
     @NotNull(message = "ID is required.")
@@ -25,15 +28,18 @@ public record RecipeDTO(
     List<RecipeIngredientResponseDTO> ingredients,
 
     @NotEmpty(message = "Recipe must have at least one step.")
-    List<@Valid RecipeStepDTO> steps
+    List<@Valid RecipeStepDTO> steps,
+
+    Set<TagDTO> tags
 ) {
-    public static RecipeDTO fromEntity(Recipe recipe) {
+    public static RecipeDTO fromEntity(Recipe recipe, List<TagDTO> tags) {
         return new RecipeDTO(
             recipe.getId(),
             recipe.getName(),
             recipe.getDescription(),
             recipe.getIngredients().stream().map(RecipeIngredientResponseDTO::fromEntity).toList(),
-            recipe.getSteps().stream().map(RecipeStepDTO::fromEntity).toList()
+            recipe.getSteps().stream().map(RecipeStepDTO::fromEntity).toList(),
+            new HashSet<>(tags)
         );
     }
 }
