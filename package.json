@@ -4,14 +4,11 @@
   "description": "",
   "scripts": {
     "prepare": "husky",
-    "run:frontend": "cd frontend && npm run dev",
+    "start:frontend": "cd frontend && npm run dev",
+    "start:backend": "cd backend && docker compose -f compose.yaml -p backend up -d app",
     "setup": "npm i && npm run setup:frontend",
     "setup:frontend": "cd frontend && npm i"
   },
-  "workspaces": [
-    "frontend",
-    "backend"
-  ],
   "lint-staged": {
     "frontend/**/*.{ts,tsx,js,jsx,html,css}": [
       "npm --prefix frontend run lint",
@@ -32,13 +29,5 @@
   "devDependencies": {
     "husky": "^9.1.7",
     "lint-staged": "^15.5.0"
-  },
-  "dependencies": {
-    "@tiptap/extension-placeholder": "^2.11.7",
-    "@tiptap/react": "^2.11.7",
-    "@tiptap/starter-kit": "^2.11.7",
-    "lucide-react": "^0.488.0",
-    "react-quill": "^2.0.0",
-    "react-router-dom": "^7.5.0"
   }
 }
