@@ -17,6 +17,7 @@ public class Recipe {
     private List<RecipeIngredient> ingredients = new ArrayList<>();
     private List<RecipeStep> steps = new ArrayList<>();
     private Set<String> tagIds = new HashSet<>();
+    private byte[] image;
 
     public Recipe(String name, String description, List<RecipeIngredient> ingredients, List<RecipeStep> steps, Set<String> tagIds) {
         this.name = name;
@@ -80,5 +81,12 @@ public class Recipe {
 
     public void setTagIds(Set<String> tagIds) {
         this.tagIds = tagIds;
+    }
+
+    public byte[] getImage() {
+        return image;
+    }
+    public void setImage(byte[] image) {
+        this.image = image;
     }
 }

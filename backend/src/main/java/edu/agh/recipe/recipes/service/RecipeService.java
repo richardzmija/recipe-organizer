@@ -9,6 +9,7 @@ import edu.agh.recipe.tags.dto.TagReferenceDTO;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Set;
@@ -17,8 +18,10 @@ public interface RecipeService {
     // Core recipe operations
     Page<RecipeDTO> getAllRecipes(Pageable pageable);
     RecipeDTO getRecipeById(String id);
+    byte[] getRecipeImageById(String id);
     RecipeDTO createRecipe(@Valid CreateRecipeDTO dto);
     RecipeDTO updateRecipe(String id, @Valid UpdateRecipeDTO dto);
+    void uploadRecipeImage(String id, MultipartFile image);
     void deleteRecipe(String id);
     void bulkDeleteRecipes(List<String> ids);
 

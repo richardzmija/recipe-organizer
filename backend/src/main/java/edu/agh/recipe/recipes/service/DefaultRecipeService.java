@@ -16,9 +16,11 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.data.domain.Pageable;
 
+import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -343,6 +345,38 @@ public class DefaultRecipeService implements RecipeService {
         addedTags.removeAll(oldTagIds);
         for (String tagId : addedTags) {
             tagService.incrementUsageCount(tagId);
+        }
+    }
+
+    @Override
+    public byte[] getRecipeImageById(String id) {
+        Recipe recipe = recipeRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Recipe not found."));
+
+        if (recipe.getImage() == null || recipe.getImage().length == 0) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No image available for this recipe");
+        }
+
+        return recipe.getImage();
+    }
+
+    @Override
+    public void uploadRecipeImage(String id, MultipartFile image) {
+        Recipe recipe = recipeRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Recipe not found."));
+
+        String contentType = image.getContentType();
+        if (!"image/png".equals(contentType)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid file format, use PNG");
+        }
+
+        try {
+            byte[] imageBytes = image.getBytes();
+            recipe.setImage(imageBytes);
+
+            recipeRepository.save(recipe);
+        } catch (IOException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Couldn't add image");
         }
     }
 }

@@ -19,9 +19,12 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Objects;
@@ -366,5 +369,48 @@ public class RecipeController {
             @RequestParam(defaultValue = "5") int limit
     ) {
         return ResponseEntity.ok(recipeService.suggestTagsForRecipe(id, limit));
+    }
+
+    @Operation(summary = "Get recipe image by recipe ID.", description = "Returns the image attached to recipe if present, else 404.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Recipe image found",
+                    content = @Content(mediaType = "image/png", schema = @Schema(type = "string", format = "binary"))),
+            @ApiResponse(responseCode = "404", description = "Recipe image not found", content = @Content)
+    })
+    @GetMapping("/{id}/image")
+    public ResponseEntity<byte[]> getRecipeImageById(
+            @Parameter(description = "Recipe identifier", required = true, in = ParameterIn.PATH)
+            @PathVariable String id
+    ) {
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_TYPE, MediaType.IMAGE_PNG_VALUE)
+                .body(recipeService.getRecipeImageById(id));
+    }
+
+    @Operation(
+            summary = "Upload recipe image.",
+            description = "Uploads an image for an existing recipe with ID.",
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "Recipe image to upload",
+                    required = true,
+                    content = @Content(
+                            mediaType = "multipart/form-data",
+                            schema = @Schema(type = "string", format = "binary")
+                    )
+            )
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Image uploaded successfully"),
+            @ApiResponse(responseCode = "404", description = "Recipe not found", content = @Content),
+            @ApiResponse(responseCode = "400", description = "Invalid image", content = @Content)
+    })
+    @PutMapping("/{id}/image")
+    public ResponseEntity<String> uploadRecipeImage(
+            @Parameter(description = "Recipe identifier", required = true, in = ParameterIn.PATH)
+            @PathVariable String id,
+            @RequestParam("image") MultipartFile image
+    ) {
+        recipeService.uploadRecipeImage(id, image);
+        return ResponseEntity.ok("Image uploaded successfully");
     }
 }
