@@ -51,7 +51,7 @@ public class DefaultRecipeMarkdownExportService implements RecipeMarkdownExportS
         // Ingredients are displayed in a list
         markdown.append("## Ingredients\n\n");
         for (var ingredient : recipe.ingredients()) {
-            markdown.append("* ").append(ingredient.quantity())
+            markdown.append("* ").append(ingredient.formattedQuantity())
                    .append(" ").append(ingredient.unit().getSymbol())
                    .append(" ").append(ingredient.ingredientName())
                    .append("\n");

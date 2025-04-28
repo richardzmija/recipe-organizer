@@ -4,7 +4,8 @@
   "description": "",
   "scripts": {
     "prepare": "husky",
-    "run:frontend": "cd frontend && npm run dev",
+    "start:frontend": "cd frontend && npm run dev",
+    "start:backend": "cd backend && docker compose -f compose.yaml -p backend up -d app",
     "setup": "npm i && npm run setup:frontend",
     "setup:frontend": "cd frontend && npm i"
   },

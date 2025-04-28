@@ -34,4 +34,11 @@ public enum MeasurementUnit {
     public MeasurementSystem getSystem() {
         return system;
     }
+
+    public boolean isFractional() {
+        return switch (this) {
+            case CUPS, TEASPOONS, TABLESPOONS -> true;
+            default -> false;
+        };
+    }
 }

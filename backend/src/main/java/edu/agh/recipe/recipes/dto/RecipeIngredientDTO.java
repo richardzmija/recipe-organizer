@@ -6,6 +6,9 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 
+/**
+ * Default DTO for recipe ingredients that is used for example for requests.
+ */
 public record RecipeIngredientDTO(
     @NotBlank(message = "Ingredient name is required.")
     String ingredientName,
@@ -17,11 +20,7 @@ public record RecipeIngredientDTO(
     @Positive(message = "Quantity must be positive.")
     Double quantity
 ) {
-    public static RecipeIngredientDTO fromEntity(RecipeIngredient ingredient) {
-        return new RecipeIngredientDTO(
-            ingredient.ingredientName(),
-            ingredient.unit(),
-            ingredient.quantity()
-        );
+    public RecipeIngredient toEntity() {
+        return RecipeIngredient.of(ingredientName, unit, quantity);
     }
 }

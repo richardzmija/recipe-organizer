@@ -25,6 +25,7 @@ interface FilterParams {
 
 export default function RecipeList() {
   const [recipes, setRecipes] = useState<Recipe[]>([]);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [pagination, setPagination] = useState({
@@ -47,6 +48,14 @@ export default function RecipeList() {
   useEffect(() => {
     fetchRecipes();
   }, [filterParams]);
+
+  const handleRecipeSelect = (id: string) => {
+    setSelectedIds((prev) => [...prev, id]);
+  };
+
+  const handleRecipeUnselect = (id: string) => {
+    setSelectedIds((prev) => prev.filter((r) => r !== id));
+  };
 
   const fetchRecipes = async () => {
     try {
@@ -97,6 +106,11 @@ export default function RecipeList() {
       ...filterParams,
       page: newPage,
     });
+  };
+
+  const handleOnRecipeDelete = (id: string) => {
+    setRecipes((prev) => prev.filter((r) => r.id !== id));
+    setSelectedIds((prev) => prev.filter((selectedId) => selectedId !== id));
   };
 
   const addIngredient = () => {
@@ -176,6 +190,8 @@ export default function RecipeList() {
           addIngredient={addIngredient}
           removeIngredient={removeIngredient}
           clearFilters={clearFilters}
+          selectedIds={selectedIds}
+          deleteRecipe={handleOnRecipeDelete}
         />
 
         {loading && <Spinner size='md' alignSelf='center' my={4} />}
@@ -201,7 +217,19 @@ export default function RecipeList() {
         ) : (
           <VStack align='stretch'>
             {recipes.map((recipe) => (
-              <RecipeCard key={recipe.id} recipe={recipe} />
+              <RecipeCard
+                key={recipe.id}
+                recipe={recipe}
+                onDelete={() => {
+                  if (recipe.id) handleOnRecipeDelete(recipe.id);
+                }}
+                onSelect={() => {
+                  if (recipe.id) handleRecipeSelect(recipe.id);
+                }}
+                onUnselect={() => {
+                  if (recipe.id) handleRecipeUnselect(recipe.id);
+                }}
+              />
             ))}
           </VStack>
         )}
