@@ -16,7 +16,7 @@ const IngredientFields = ({ ingredients, onChange }: Props) => {
   };
 
   const handleAdd = () => {
-    onChange([...ingredients, { ingredientName: '', metric: 'GRAMS', quantity: 0 }]);
+    onChange([...ingredients, { ingredientName: '', unit: 'GRAMS', quantity: 0 }]);
   };
 
   const handleRemove = (index: number) => {
@@ -30,12 +30,11 @@ const IngredientFields = ({ ingredients, onChange }: Props) => {
         <HStack key={i} gap={3}>
           <Input
             placeholder='Ingredient'
-            color='black'
             value={ingredient.ingredientName}
             onChange={(e) => handleChange(i, 'ingredientName', e.target.value)}
           />
 
-          <MetricSelect value={ingredient.metric} onChange={(val) => handleChange(i, 'metric', val)} />
+          <MetricSelect value={ingredient.unit} onChange={(val) => handleChange(i, 'unit', val)} />
 
           <NumberInput.Root
             min={0}
@@ -46,22 +45,16 @@ const IngredientFields = ({ ingredients, onChange }: Props) => {
             size='xs'
             width='170px'>
             <NumberInput.Control />
-            <NumberInput.Input color='black' />
+            <NumberInput.Input />
           </NumberInput.Root>
 
-          <IconButton aria-label='Delete ingredient' variant='outline' color='black' onClick={() => handleRemove(i)}>
+          <IconButton aria-label='Delete ingredient' variant='outline' onClick={() => handleRemove(i)}>
             <LuTrash2 />
           </IconButton>
         </HStack>
       ))}
 
-      <Button
-        size='sm'
-        onClick={handleAdd}
-        variant='outline'
-        color='black'
-        _hover={{ bg: 'black', color: 'white' }}
-        alignSelf='flex-start'>
+      <Button size='sm' onClick={handleAdd} variant='outline' alignSelf='flex-start'>
         + Add ingredient
       </Button>
     </VStack>
