@@ -26,7 +26,7 @@ const TagInput = ({ tags, onChange }: Props) => {
   return (
     <>
       <HStack mb={2}>
-        <Input value={tagInput} color='black' onChange={(e) => setTagInput(e.target.value)} placeholder='Add tag' />
+        <Input value={tagInput} onChange={(e) => setTagInput(e.target.value)} placeholder='Add tag' />
         <IconButton aria-label='Add tag' onClick={handleAdd}>
           <LuPlus />
         </IconButton>
@@ -34,10 +34,8 @@ const TagInput = ({ tags, onChange }: Props) => {
 
       <HStack wrap='wrap' gap={2}>
         {tags.map((tag, i) => (
-          <Flex key={i} px={2} py={1} bg='gray.100' borderRadius='md' align='center' gap={1}>
-            <Box color='black' fontWeight='bold'>
-              {tag}
-            </Box>
+          <Flex key={i} px={2} py={1} borderRadius='md' align='center' gap={1}>
+            <Box fontWeight='bold'>{tag}</Box>
             <IconButton aria-label={`Usuń tag ${tag}`} size='xs' variant='ghost' onClick={() => handleRemove(i)}>
               <LuX />
             </IconButton>
