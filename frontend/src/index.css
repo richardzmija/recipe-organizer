@@ -1,11 +1,5 @@
 @import 'tailwindcss';
-@tailwind base;
-@tailwind components;
 @tailwind utilities;
-
-body {
-  @apply bg-gray-200;
-}
 
 .tiptap-editor {
   white-space: normal;
@@ -13,7 +7,6 @@ body {
   word-break: break-word;
   line-height: 1.4;
   font-size: 14px;
-  color: black;
 }
 
 .tiptap-editor p.is-editor-empty:first-child::before {
@@ -43,6 +36,10 @@ body {
 }
 .tiptap-editor li {
   margin-bottom: 0.25em;
+}
+
+.tiptap-editor em {
+  font-style: italic;
 }
 
 .preview-box ol {
