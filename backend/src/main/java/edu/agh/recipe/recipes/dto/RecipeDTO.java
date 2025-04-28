@@ -22,7 +22,7 @@ public record RecipeDTO(
     String description,
 
     @NotEmpty(message = "Recipe must have at least one ingredient.")
-    List<@Valid RecipeIngredientDTO> ingredients,
+    List<RecipeIngredientResponseDTO> ingredients,
 
     @NotEmpty(message = "Recipe must have at least one step.")
     List<@Valid RecipeStepDTO> steps
@@ -32,7 +32,7 @@ public record RecipeDTO(
             recipe.getId(),
             recipe.getName(),
             recipe.getDescription(),
-            recipe.getIngredients().stream().map(RecipeIngredientDTO::fromEntity).toList(),
+            recipe.getIngredients().stream().map(RecipeIngredientResponseDTO::fromEntity).toList(),
             recipe.getSteps().stream().map(RecipeStepDTO::fromEntity).toList()
         );
     }
