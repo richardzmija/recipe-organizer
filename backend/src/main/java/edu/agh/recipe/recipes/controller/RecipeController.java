@@ -129,6 +129,29 @@ public class RecipeController {
     }
 
     @Operation(
+            summary = "Get recipe name suggestions.",
+            description = "Returns a limited list of recipes whose names start with the query, for search suggestions."
+    )
+    @ApiResponse(
+            responseCode = "200",
+            description = "Successfully retrieved suggestions",
+            content = @Content(schema = @Schema(implementation = Page.class))
+    )
+    @GetMapping("/suggestions")
+    public ResponseEntity<Page<RecipeDTO>> getRecipeSuggestions(
+            @Parameter(description = "Partial recipe name to search for", required = true)
+            @RequestParam String query,
+            @Parameter(description = "Maximum number of suggestions to return")
+            @RequestParam(defaultValue = "5") int limit
+    ) {
+        // Enforce a limit between 1 and 20.
+        int effectiveLimit = Math.max(1, Math.min(limit, 20));
+        Pageable pageable = PageRequest.of(0, effectiveLimit, Sort.by(Sort.Direction.ASC, "name"));
+        Page<RecipeDTO> suggestions = recipeService.suggestRecipesByName(query, pageable);
+        return ResponseEntity.ok(suggestions);
+    }
+
+    @Operation(
             summary = "Create recipe.",
             description = "Creates a new recipe and returns the created entity.",
             requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(

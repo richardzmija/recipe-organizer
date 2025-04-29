@@ -83,6 +83,12 @@ public class DefaultRecipeService implements RecipeService {
         return recipePage.map(RecipeDTO::fromEntity);
     }
 
+    @Override
+    public Page<RecipeDTO> suggestRecipesByName(String nameQuery, Pageable pageable) {
+        Page<Recipe> recipePage = recipeRepository.findByNameStartingWithIgnoreCase(nameQuery, pageable);
+        return recipePage.map(RecipeDTO::fromEntity);
+    }
+
     private Recipe createRecipeEntity(String name, String description,
                                       List<RecipeIngredientDTO> ingredients,
                                       List<RecipeStepDTO> steps) {
