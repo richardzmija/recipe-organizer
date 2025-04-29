@@ -5,6 +5,8 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
 import java.util.List;
+import java.util.Set;
+import edu.agh.recipe.tags.dto.TagReferenceDTO;
 
 public record UpdateRecipeDTO(
     @NotBlank(message = "Recipe name is required.")
@@ -19,5 +21,7 @@ public record UpdateRecipeDTO(
     List<@Valid RecipeIngredientDTO> ingredients,
 
     @NotEmpty(message = "Recipe must have at least one step.")
-    List<@Valid RecipeStepDTO> steps
+    List<@Valid RecipeStepDTO> steps,
+
+    Set<TagReferenceDTO> tags
 ) {}

@@ -4,6 +4,8 @@ import edu.agh.recipe.recipes.dto.CreateRecipeDTO;
 import edu.agh.recipe.recipes.dto.RecipeDTO;
 import edu.agh.recipe.recipes.dto.UpdateRecipeDTO;
 import edu.agh.recipe.recipes.service.RecipeService;
+import edu.agh.recipe.tags.dto.TagDTO;
+import edu.agh.recipe.tags.dto.TagReferenceDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
@@ -23,6 +25,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/recipes")
@@ -226,5 +229,142 @@ public class RecipeController {
     ) {
         recipeService.bulkDeleteRecipes(ids);
         return ResponseEntity.noContent().build();
+    }
+
+    @Operation(
+            summary = "Filter recipes by tag ID.",
+            description = "Returns recipes that have the specified tag."
+    )
+    @ApiResponse(
+            responseCode = "200",
+            description = "Successfully retrieved filtered recipes",
+            content = @Content(schema = @Schema(implementation = Page.class))
+    )
+    @GetMapping("/filter/tag/by-id")
+    public ResponseEntity<Page<RecipeDTO>> getRecipesByTagId(
+            @Parameter(description = "Tag identifier")
+            @RequestParam String tagId,
+            @Parameter(description = "Page number (zero-based)")
+            @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "Number of items per page")
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        Pageable pageable = PageRequest.of(page, size);
+        return ResponseEntity.ok(recipeService.findRecipesByTag(tagId, pageable));
+    }
+
+    @Operation(
+            summary = "Filter recipes by tag name.",
+            description = "Returns recipes that have a tag with the specified name."
+    )
+    @GetMapping("/filter/tag/by-name")
+    public ResponseEntity<Page<RecipeDTO>> getRecipesByTagName(
+            @Parameter(description = "Tag name")
+            @RequestParam String tagName,
+            @Parameter(description = "Page number (zero-based)")
+            @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "Number of items per page")
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        Pageable pageable = PageRequest.of(page, size);
+        return ResponseEntity.ok(recipeService.findRecipesByTagName(tagName, pageable));
+    }
+
+    @Operation(
+            summary = "Filter recipes by any tags.",
+            description = "Returns recipes that have any of the specified tags."
+    )
+    @ApiResponse(
+            responseCode = "200",
+            description = "Successfully retrieved filtered recipes",
+            content = @Content(schema = @Schema(implementation = Page.class))
+    )
+    @GetMapping("/filter/tags/any")
+    public ResponseEntity<Page<RecipeDTO>> getRecipesByAnyTagIds(
+            @Parameter(description = "Tag IDs")
+            @RequestParam List<String> tagIds,
+            @Parameter(description = "Page number (zero-based)")
+            @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "Number of items per page")
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        Pageable pageable = PageRequest.of(page, size);
+        return ResponseEntity.ok(recipeService.findRecipesByAnyTags(tagIds, pageable));
+    }
+
+    @Operation(
+            summary = "Filter recipes by all tags.",
+            description = "Returns recipes that have all of the specified tags."
+    )
+    @ApiResponse(
+            responseCode = "200",
+            description = "Successfully retrieved filtered recipes",
+            content = @Content(schema = @Schema(implementation = Page.class))
+    )
+    @GetMapping("/filter/tags/all")
+    public ResponseEntity<Page<RecipeDTO>> getRecipesByAllTagIds(
+            @Parameter(description = "Tag IDs")
+            @RequestParam List<String> tagIds,
+            @Parameter(description = "Page number (zero-based)")
+            @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "Number of items per page")
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        Pageable pageable = PageRequest.of(page, size);
+        return ResponseEntity.ok(recipeService.findRecipesByAllTags(tagIds, pageable));
+    }
+
+    @Operation(
+            summary = "Add tags to recipe.",
+            description = "Adds specified tags to a recipe."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Tags added successfully",
+                    content = @Content(schema = @Schema(implementation = RecipeDTO.class))),
+            @ApiResponse(responseCode = "404", description = "Recipe not found", content = @Content)
+    })
+    @PatchMapping("/{id}/tags")
+    public ResponseEntity<RecipeDTO> addTagsToRecipe(
+            @Parameter(description = "Recipe identifier", required = true)
+            @PathVariable String id,
+            @RequestBody Set<TagReferenceDTO> tagReferences
+    ) {
+        return ResponseEntity.ok(recipeService.addTagsToRecipe(id, tagReferences));
+    }
+
+    @Operation(
+            summary = "Remove tags from recipe.",
+            description = "Removes specified tags from a recipe."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Tags removed successfully",
+                    content = @Content(schema = @Schema(implementation = RecipeDTO.class))),
+            @ApiResponse(responseCode = "404", description = "Recipe not found", content = @Content)
+    })
+    @DeleteMapping("/{id}/tags")
+    public ResponseEntity<RecipeDTO> removeTagsFromRecipe(
+            @Parameter(description = "Recipe identifier", required = true)
+            @PathVariable String id,
+            @RequestBody Set<TagReferenceDTO> tagReferences
+    ) {
+        return ResponseEntity.ok(recipeService.removeTagsFromRecipe(id, tagReferences));
+    }
+
+    @Operation(
+            summary = "Get tag suggestions for recipe",
+            description = "Returns tag suggestions for a specific recipe"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved tag suggestions",
+                    content = @Content(schema = @Schema(implementation = List.class)))
+    })
+    @GetMapping("/{id}/tag-suggestions")
+    public ResponseEntity<List<TagDTO>> getTagSuggestions(
+            @Parameter(description = "Recipe identifier", required = true, in = ParameterIn.PATH)
+            @PathVariable String id,
+            @Parameter(description = "Maximum number of suggestions")
+            @RequestParam(defaultValue = "5") int limit
+    ) {
+        return ResponseEntity.ok(recipeService.suggestTagsForRecipe(id, limit));
     }
 }

@@ -2,6 +2,7 @@ package edu.agh.recipe.export.service;
 
 import edu.agh.recipe.export.exception.RecipeExportException;
 import edu.agh.recipe.recipes.dto.RecipeDTO;
+import edu.agh.recipe.tags.dto.TagDTO;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
@@ -46,6 +47,19 @@ public class DefaultRecipeMarkdownExportService implements RecipeMarkdownExportS
         // Description in the recipe
         if (recipe.description() != null && !recipe.description().isBlank()) {
             markdown.append(recipe.description()).append("\n\n");
+        }
+
+        // Tags
+        if (recipe.tags() != null && !recipe.tags().isEmpty()) {
+            markdown.append("## Tags\n\n");
+            for (TagDTO tag : recipe.tags()) {
+                markdown.append("* ").append(tag.name());
+                if (tag.category() != null && !tag.category().isBlank()) {
+                    markdown.append(" (").append(tag.category()).append(")");
+                }
+                markdown.append("\n");
+            }
+            markdown.append("\n");
         }
 
         // Ingredients are displayed in a list

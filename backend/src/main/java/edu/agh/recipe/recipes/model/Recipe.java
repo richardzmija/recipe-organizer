@@ -4,7 +4,9 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Document("recipes")
 public class Recipe {
@@ -14,12 +16,14 @@ public class Recipe {
     private String description;
     private List<RecipeIngredient> ingredients = new ArrayList<>();
     private List<RecipeStep> steps = new ArrayList<>();
+    private Set<String> tagIds = new HashSet<>();
 
-    public Recipe(String name, String description, List<RecipeIngredient> ingredients, List<RecipeStep> steps) {
+    public Recipe(String name, String description, List<RecipeIngredient> ingredients, List<RecipeStep> steps, Set<String> tagIds) {
         this.name = name;
         this.description = description;
         this.ingredients = ingredients;
         this.steps = steps;
+        this.tagIds = tagIds;
     }
 
     public Recipe(String name, String description) {
@@ -68,5 +72,13 @@ public class Recipe {
 
     public void setSteps(List<RecipeStep> steps) {
         this.steps = steps;
+    }
+
+    public Set<String> getTagIds() {
+        return tagIds;
+    }
+
+    public void setTagIds(Set<String> tagIds) {
+        this.tagIds = tagIds;
     }
 }
