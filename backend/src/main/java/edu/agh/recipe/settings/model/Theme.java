@@ -1,10 +1,10 @@
-package edu.agh.recipe.units.domain;
+package edu.agh.recipe.settings.model;
 
-public enum MeasurementSystem {
-    METRIC,
-    IMPERIAL;
+public enum Theme {
+    LIGHT,
+    DARK;
 
-    public static MeasurementSystem fromString(String value) {
+    public static Theme fromString(String value) {
         try {
             return value != null ? valueOf(value.toUpperCase()) : null;
         } catch (IllegalArgumentException e) {
