@@ -1,5 +1,8 @@
 package edu.agh.recipe.recipes.service;
 
+import edu.agh.recipe.images.dto.ImageDTO;
+import edu.agh.recipe.images.dto.ImageMetadataDTO;
+import edu.agh.recipe.images.service.ImageService;
 import edu.agh.recipe.recipes.dto.*;
 import edu.agh.recipe.recipes.model.Recipe;
 import edu.agh.recipe.recipes.model.RecipeStep;
@@ -20,7 +23,6 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.data.domain.Pageable;
 
-import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -33,10 +35,12 @@ public class DefaultRecipeService implements RecipeService {
 
     private final RecipeRepository recipeRepository;
     private final TagService tagService;
+    private final ImageService imageService;
 
-    public DefaultRecipeService(RecipeRepository recipeRepository, TagService tagService) {
+    public DefaultRecipeService(RecipeRepository recipeRepository, TagService tagService, ImageService imageService) {
         this.recipeRepository = Objects.requireNonNull(recipeRepository);
         this.tagService = Objects.requireNonNull(tagService);
+        this.imageService = Objects.requireNonNull(imageService);
     }
 
     @Override
@@ -44,7 +48,8 @@ public class DefaultRecipeService implements RecipeService {
         Page<Recipe> recipePage = recipeRepository.findAll(pageable);
         return recipePage.map(recipe -> {
             List<TagDTO> tags = tagService.getTagsByIds(new ArrayList<>(recipe.getTagIds()));
-            return RecipeDTO.fromEntity(recipe, tags);
+            List<ImageDTO> images = imageService.getImagesDataByIds(new ArrayList<>(recipe.getImageIds()));
+            return RecipeDTO.fromEntity(recipe, tags, images);
         });
     }
 
@@ -54,7 +59,8 @@ public class DefaultRecipeService implements RecipeService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Recipe not found."));
 
         List<TagDTO> tags = tagService.getTagsByIds(new ArrayList<>(recipe.getTagIds()));
-        return RecipeDTO.fromEntity(recipe, tags);
+        List<ImageDTO> images = imageService.getImagesDataByIds(new ArrayList<>(recipe.getImageIds()));
+        return RecipeDTO.fromEntity(recipe, tags, images);
     }
 
     @Override
@@ -72,7 +78,8 @@ public class DefaultRecipeService implements RecipeService {
         Recipe savedRecipe = recipeRepository.save(recipe);
 
         List<TagDTO> tags = tagService.getTagsByIds(new ArrayList<>(tagIds));
-        return RecipeDTO.fromEntity(savedRecipe, tags);
+        List<ImageDTO> images = imageService.getImagesDataByIds(new ArrayList<>(recipe.getImageIds()));
+        return RecipeDTO.fromEntity(savedRecipe, tags, images);
     }
 
     @Override
@@ -102,7 +109,8 @@ public class DefaultRecipeService implements RecipeService {
         updateTagUsageCounts(oldTagIds, newTagIds);
 
         List<TagDTO> tags = tagService.getTagsByIds(new ArrayList<>(newTagIds));
-        return RecipeDTO.fromEntity(updatedRecipe, tags);
+        List<ImageDTO> images = imageService.getImagesDataByIds(new ArrayList<>(recipe.getImageIds()));
+        return RecipeDTO.fromEntity(updatedRecipe, tags, images);
     }
 
     @Override
@@ -144,7 +152,8 @@ public class DefaultRecipeService implements RecipeService {
         Page<Recipe> recipePage = recipeRepository.findByIngredientsIngredientNameIn(lowerCaseIngredients, pageable);
         return recipePage.map(recipe -> {
             List<TagDTO> tags = tagService.getTagsByIds(new ArrayList<>(recipe.getTagIds()));
-            return RecipeDTO.fromEntity(recipe, tags);
+            List<ImageDTO> images = imageService.getImagesDataByIds(new ArrayList<>(recipe.getImageIds()));
+            return RecipeDTO.fromEntity(recipe, tags, images);
         });
     }
 
@@ -156,7 +165,8 @@ public class DefaultRecipeService implements RecipeService {
         Page<Recipe> recipePage = recipeRepository.findByAllIngredientsContaining(lowerCaseIngredientNames, pageable);
         return recipePage.map(recipe -> {
             List<TagDTO> tags = tagService.getTagsByIds(new ArrayList<>(recipe.getTagIds()));
-            return RecipeDTO.fromEntity(recipe, tags);
+            List<ImageDTO> images = imageService.getImagesDataByIds(new ArrayList<>(recipe.getImageIds()));
+            return RecipeDTO.fromEntity(recipe, tags, images);
         });
     }
 
@@ -165,7 +175,8 @@ public class DefaultRecipeService implements RecipeService {
         Page<Recipe> recipePage = recipeRepository.findByNameStartingWithIgnoreCase(nameQuery, pageable);
         return recipePage.map(recipe -> {
             List<TagDTO> tags = tagService.getTagsByIds(new ArrayList<>(recipe.getTagIds()));
-            return RecipeDTO.fromEntity(recipe, tags);
+            List<ImageDTO> images = imageService.getImagesDataByIds(new ArrayList<>(recipe.getImageIds()));
+            return RecipeDTO.fromEntity(recipe, tags, images);
         });
     }
 
@@ -174,7 +185,8 @@ public class DefaultRecipeService implements RecipeService {
         Page<Recipe> recipePage = recipeRepository.findByTagIdsContaining(tagId, pageable);
         return recipePage.map(recipe -> {
             List<TagDTO> tags = tagService.getTagsByIds(new ArrayList<>(recipe.getTagIds()));
-            return RecipeDTO.fromEntity(recipe, tags);
+            List<ImageDTO> images = imageService.getImagesDataByIds(new ArrayList<>(recipe.getImageIds()));
+            return RecipeDTO.fromEntity(recipe, tags, images);
         });
     }
 
@@ -194,7 +206,8 @@ public class DefaultRecipeService implements RecipeService {
         Page<Recipe> recipePage = recipeRepository.findByTagIdsIn(tagIds, pageable);
         return recipePage.map(recipe -> {
             List<TagDTO> tags = tagService.getTagsByIds(new ArrayList<>(recipe.getTagIds()));
-            return RecipeDTO.fromEntity(recipe, tags);
+            List<ImageDTO> images = imageService.getImagesDataByIds(new ArrayList<>(recipe.getImageIds()));
+            return RecipeDTO.fromEntity(recipe, tags, images);
         });
     }
 
@@ -203,7 +216,8 @@ public class DefaultRecipeService implements RecipeService {
         Page<Recipe> recipePage = recipeRepository.findByTagIdsAll(tagIds, pageable);
         return recipePage.map(recipe -> {
             List<TagDTO> tags = tagService.getTagsByIds(new ArrayList<>(recipe.getTagIds()));
-            return RecipeDTO.fromEntity(recipe, tags);
+            List<ImageDTO> images = imageService.getImagesDataByIds(new ArrayList<>(recipe.getImageIds()));
+            return RecipeDTO.fromEntity(recipe, tags, images);
         });
     }
 
@@ -220,7 +234,8 @@ public class DefaultRecipeService implements RecipeService {
         Recipe savedRecipe = recipeRepository.save(recipe);
 
         List<TagDTO> tags = tagService.getTagsByIds(new ArrayList<>(savedRecipe.getTagIds()));
-        return RecipeDTO.fromEntity(savedRecipe, tags);
+        List<ImageDTO> images = imageService.getImagesDataByIds(new ArrayList<>(recipe.getImageIds()));
+        return RecipeDTO.fromEntity(savedRecipe, tags, images);
     }
 
     @Override
@@ -267,7 +282,8 @@ public class DefaultRecipeService implements RecipeService {
         }
 
         List<TagDTO> tags = tagService.getTagsByIds(new ArrayList<>(recipe.getTagIds()));
-        return RecipeDTO.fromEntity(recipe, tags);
+        List<ImageDTO> images = imageService.getImagesDataByIds(new ArrayList<>(recipe.getImageIds()));
+        return RecipeDTO.fromEntity(recipe, tags, images);
     }
 
     @Override
@@ -284,6 +300,78 @@ public class DefaultRecipeService implements RecipeService {
                 .filter(tag -> !existingTagIds.contains(tag.id()))
                 .limit(limit)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public RecipeDTO uploadImageForRecipe(String recipeId, String description, MultipartFile image){
+        Recipe recipe = recipeRepository.findById(recipeId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Recipe not found."));
+
+        ImageMetadataDTO imageMetadataDTO = new ImageMetadataDTO(
+                recipeId, description, recipe.getImageIds().isEmpty(), new Date()
+        );
+
+        String imageId = imageService.uploadImage(image, imageMetadataDTO);
+
+        Set<String> imageIds = new HashSet<>(recipe.getImageIds());
+        imageIds.add(imageId);
+        recipe.setImageIds(imageIds);
+
+        Recipe savedRecipe = recipeRepository.save(recipe);
+
+        List<TagDTO> tags = tagService.getTagsByIds(new ArrayList<>(savedRecipe.getTagIds()));
+        List<ImageDTO> images = imageService.getImagesDataByIds(new ArrayList<>(recipe.getImageIds()));
+        return RecipeDTO.fromEntity(recipe, tags, images);
+    }
+
+    @Override
+    public RecipeDTO removeImageFromRecipe(String recipeId, String imageId) {
+        Recipe recipe = recipeRepository.findById(recipeId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Recipe not found."));
+
+        imageService.removeImageById(imageId);
+
+        Set<String> imageIds = new HashSet<>(recipe.getImageIds());
+        imageIds.remove(imageId);
+        recipe.setImageIds(imageIds);
+
+        Recipe savedRecipe = recipeRepository.save(recipe);
+
+        List<TagDTO> tags = tagService.getTagsByIds(new ArrayList<>(savedRecipe.getTagIds()));
+        List<ImageDTO> images = imageService.getImagesDataByIds(new ArrayList<>(recipe.getImageIds()));
+        return RecipeDTO.fromEntity(recipe, tags, images);
+    }
+
+    @Override
+    public RecipeDTO setImageAsPrimary(String recipeId, String imageId) {
+        Recipe recipe = recipeRepository.findById(recipeId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Recipe not found."));
+
+        List<ImageDTO> images = imageService.getImagesDataByIds(new ArrayList<>(recipe.getImageIds()));
+
+        if(images.stream().filter((ImageDTO::isPrimary)).toList().isEmpty()){
+            imageService.setImagePrimary(imageId, true);
+        }
+        else {
+            String currentPrimaryId = images.stream()
+                    .filter((ImageDTO::isPrimary))
+                    .toList()
+                    .getFirst()
+                    .id();
+
+            if(currentPrimaryId.equals(imageId)){
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Image already primary");
+            }
+
+            imageService.setImagePrimary(currentPrimaryId, false);
+            imageService.setImagePrimary(imageId, true);
+        }
+
+        Recipe savedRecipe = recipeRepository.save(recipe);
+
+        List<TagDTO> tags = tagService.getTagsByIds(new ArrayList<>(savedRecipe.getTagIds()));
+        images = imageService.getImagesDataByIds(new ArrayList<>(recipe.getImageIds()));
+        return RecipeDTO.fromEntity(recipe, tags, images);
     }
 
     /**
@@ -348,35 +436,5 @@ public class DefaultRecipeService implements RecipeService {
         }
     }
 
-    @Override
-    public byte[] getRecipeImageById(String id) {
-        Recipe recipe = recipeRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Recipe not found."));
 
-        if (recipe.getImage() == null || recipe.getImage().length == 0) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No image available for this recipe");
-        }
-
-        return recipe.getImage();
-    }
-
-    @Override
-    public void uploadRecipeImage(String id, MultipartFile image) {
-        Recipe recipe = recipeRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Recipe not found."));
-
-        String contentType = image.getContentType();
-        if (!"image/png".equals(contentType)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid file format, use PNG");
-        }
-
-        try {
-            byte[] imageBytes = image.getBytes();
-            recipe.setImage(imageBytes);
-
-            recipeRepository.save(recipe);
-        } catch (IOException e) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Couldn't add image");
-        }
-    }
 }

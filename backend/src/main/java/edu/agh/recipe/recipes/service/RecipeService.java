@@ -42,4 +42,9 @@ public interface RecipeService {
 
     // Recipe-specific tag functionality
     List<TagDTO> suggestTagsForRecipe(String recipeId, int limit);
+
+    // Recipe-image operations
+    RecipeDTO uploadImageForRecipe(String recipeId, String description, MultipartFile image);
+    RecipeDTO removeImageFromRecipe(String id, String imageId);
+    RecipeDTO setImageAsPrimary(String id, String imageId);
 }

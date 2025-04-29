@@ -19,9 +19,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -371,22 +369,6 @@ public class RecipeController {
         return ResponseEntity.ok(recipeService.suggestTagsForRecipe(id, limit));
     }
 
-    @Operation(summary = "Get recipe image by recipe ID.", description = "Returns the image attached to recipe if present, else 404.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Recipe image found",
-                    content = @Content(mediaType = "image/png", schema = @Schema(type = "string", format = "binary"))),
-            @ApiResponse(responseCode = "404", description = "Recipe image not found", content = @Content)
-    })
-    @GetMapping("/{id}/image")
-    public ResponseEntity<byte[]> getRecipeImageById(
-            @Parameter(description = "Recipe identifier", required = true, in = ParameterIn.PATH)
-            @PathVariable String id
-    ) {
-        return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_TYPE, MediaType.IMAGE_PNG_VALUE)
-                .body(recipeService.getRecipeImageById(id));
-    }
-
     @Operation(
             summary = "Upload recipe image.",
             description = "Uploads an image for an existing recipe with ID.",
@@ -400,17 +382,58 @@ public class RecipeController {
             )
     )
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Image uploaded successfully"),
+            @ApiResponse(responseCode = "200", description = "Image uploaded successfully",
+                    content = @Content(schema = @Schema(implementation = RecipeDTO.class))),
             @ApiResponse(responseCode = "404", description = "Recipe not found", content = @Content),
             @ApiResponse(responseCode = "400", description = "Invalid image", content = @Content)
     })
-    @PutMapping("/{id}/image")
-    public ResponseEntity<String> uploadRecipeImage(
+    @PatchMapping("/{id}/image")
+    public ResponseEntity<RecipeDTO> uploadRecipeImage(
             @Parameter(description = "Recipe identifier", required = true, in = ParameterIn.PATH)
             @PathVariable String id,
+            @Parameter(description = "Image description")
+            @RequestParam("description") String description,
             @RequestParam("image") MultipartFile image
     ) {
-        recipeService.uploadRecipeImage(id, image);
-        return ResponseEntity.ok("Image uploaded successfully");
+        return ResponseEntity.ok(recipeService.uploadImageForRecipe(id, description, image));
+    }
+
+    @Operation(
+            summary = "Remove image from recipe.",
+            description = "Removes specified image from a recipe."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Image removed successfully",
+                    content = @Content(schema = @Schema(implementation = RecipeDTO.class))),
+            @ApiResponse(responseCode = "404", description = "Recipe not found", content = @Content)
+    })
+    @DeleteMapping("/{id}/image/{imageId}")
+    public ResponseEntity<RecipeDTO> removeTagsFromRecipe(
+            @Parameter(description = "Recipe identifier", required = true)
+            @PathVariable String id,
+            @Parameter(description = "Image identifier", required = true)
+            @PathVariable String imageId
+    ) {
+        return ResponseEntity.ok(recipeService.removeImageFromRecipe(id, imageId));
+    }
+
+    @Operation(
+            summary = "Change recipe thumbnail.",
+            description = "Changes thumbnail for provided recipe to provided image."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Thumbnail changed successfully",
+                    content = @Content(schema = @Schema(implementation = RecipeDTO.class))),
+            @ApiResponse(responseCode = "404", description = "Recipe not found", content = @Content),
+            @ApiResponse(responseCode = "400", description = "Image already primary", content = @Content)
+    })
+    @PatchMapping("/{id}/image/{imageId}")
+    public ResponseEntity<RecipeDTO> setImageAsPrimary(
+            @Parameter(description = "Recipe identifier", required = true)
+            @PathVariable String id,
+            @Parameter(description = "Image identifier", required = true)
+            @PathVariable String imageId
+    ) {
+        return ResponseEntity.ok(recipeService.setImageAsPrimary(id, imageId));
     }
 }
