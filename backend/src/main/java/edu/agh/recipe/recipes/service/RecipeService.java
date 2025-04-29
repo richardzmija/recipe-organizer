@@ -11,6 +11,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
 
+
 import java.util.List;
 import java.util.Set;
 
@@ -47,4 +48,5 @@ public interface RecipeService {
     RecipeDTO uploadImageForRecipe(String recipeId, String description, MultipartFile image);
     RecipeDTO removeImageFromRecipe(String id, String imageId);
     RecipeDTO setImageAsPrimary(String id, String imageId);
+
 }

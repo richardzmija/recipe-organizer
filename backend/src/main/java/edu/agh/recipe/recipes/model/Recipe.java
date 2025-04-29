@@ -19,6 +19,7 @@ public class Recipe {
     private Set<String> tagIds = new HashSet<>();
     private Set<String> imageIds = new HashSet<>();
 
+
     public Recipe(String name, String description, List<RecipeIngredient> ingredients, List<RecipeStep> steps, Set<String> tagIds) {
         this.name = name;
         this.description = description;
@@ -90,4 +91,5 @@ public class Recipe {
     public void setImageIds(Set<String> imageIds) {
         this.imageIds = imageIds;
     }
+
 }
