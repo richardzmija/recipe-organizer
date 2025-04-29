@@ -66,6 +66,20 @@ public class DefaultRecipeService implements RecipeService {
     }
 
     @Override
+    public void bulkDeleteRecipes(List<String> ids) {
+        List<String> existingIds = recipeRepository.findAllById(ids)
+                .stream()
+                .map(Recipe::getId)
+                .toList();
+
+        if (existingIds.size() != ids.size()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "One of more recipes not found.");
+        }
+
+        recipeRepository.deleteAllById(ids);
+    }
+
+    @Override
     public Page<RecipeDTO> findRecipesContainingAnyIngredients(List<String> ingredients, Pageable pageable) {
         List<String> lowerCaseIngredients = ingredients.stream()
                 .map(String::toLowerCase)

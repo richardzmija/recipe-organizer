@@ -212,4 +212,19 @@ public class RecipeController {
         recipeService.deleteRecipe(id);
         return ResponseEntity.noContent().build();
     }
+
+    @Operation(summary = "Delete multiple recipes.",
+            description = "Deletes multiple recipes by IDs atomically - all succeed or all fail.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Recipes deleted successfully", content = @Content),
+            @ApiResponse(responseCode = "404", description = "One or more recipes not found", content = @Content)
+    })
+    @DeleteMapping("/bulk")
+    public ResponseEntity<Void> bulkDeleteRecipes(
+            @Parameter(description = "Recipe identifiers", required = true)
+            @RequestBody List<String> ids
+    ) {
+        recipeService.bulkDeleteRecipes(ids);
+        return ResponseEntity.noContent().build();
+    }
 }

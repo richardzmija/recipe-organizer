@@ -15,6 +15,7 @@ public interface RecipeService {
     RecipeDTO createRecipe(@Valid CreateRecipeDTO dto);
     RecipeDTO updateRecipe(String id, @Valid UpdateRecipeDTO dto);
     void deleteRecipe(String id);
+    void bulkDeleteRecipes(List<String> ids);
 
     /**
      * Finds recipes containing *any* of the specified ingredients.
