@@ -19,10 +19,8 @@ public interface RecipeService {
     // Core recipe operations
     Page<RecipeDTO> getAllRecipes(Pageable pageable);
     RecipeDTO getRecipeById(String id);
-    byte[] getRecipeImageById(String id);
     RecipeDTO createRecipe(@Valid CreateRecipeDTO dto);
     RecipeDTO updateRecipe(String id, @Valid UpdateRecipeDTO dto);
-    void uploadRecipeImage(String id, MultipartFile image);
     void deleteRecipe(String id);
     void bulkDeleteRecipes(List<String> ids);
 
