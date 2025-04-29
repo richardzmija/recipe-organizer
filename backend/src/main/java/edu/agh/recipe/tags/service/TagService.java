@@ -2,6 +2,7 @@ package edu.agh.recipe.tags.service;
 
 import edu.agh.recipe.tags.dto.CreateTagDTO;
 import edu.agh.recipe.tags.dto.TagDTO;
+import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -12,8 +13,8 @@ public interface TagService {
     TagDTO getTagById(String id);
     TagDTO getTagByName(String name);
     boolean existsByTagName(String name);
-    TagDTO createTag(CreateTagDTO createTagDTO);
-    TagDTO updateTag(String id, CreateTagDTO updateTagDTO);
+    TagDTO createTag(@Valid CreateTagDTO createTagDTO);
+    TagDTO updateTag(String id, @Valid CreateTagDTO updateTagDTO);
     void deleteTag(String id);
     Page<TagDTO> findTagsByNameContaining(String name, Pageable pageable);
     List<TagDTO> getTagsByNames(List<String> names);
