@@ -66,8 +66,20 @@ public class DefaultRecipeService implements RecipeService {
     }
 
     @Override
-    public Page<RecipeDTO> getRecipesByIngredients(List<String> ingredients, Pageable pageable) {
-        Page<Recipe> recipePage = recipeRepository.findByIngredientsIngredientNameIn(ingredients, pageable);
+    public Page<RecipeDTO> findRecipesContainingAnyIngredients(List<String> ingredients, Pageable pageable) {
+        List<String> lowerCaseIngredients = ingredients.stream()
+                .map(String::toLowerCase)
+                .toList();
+        Page<Recipe> recipePage = recipeRepository.findByIngredientsIngredientNameIn(lowerCaseIngredients, pageable);
+        return recipePage.map(RecipeDTO::fromEntity);
+    }
+
+    @Override
+    public Page<RecipeDTO> findRecipesContainingAllIngredients(List<String> ingredientNames, Pageable pageable) {
+        List<String> lowerCaseIngredientNames = ingredientNames.stream()
+                .map(String::toLowerCase)
+                .toList();
+        Page<Recipe> recipePage = recipeRepository.findByAllIngredientsContaining(lowerCaseIngredientNames, pageable);
         return recipePage.map(RecipeDTO::fromEntity);
     }
 
