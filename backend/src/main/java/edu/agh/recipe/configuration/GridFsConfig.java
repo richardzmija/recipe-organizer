@@ -14,7 +14,8 @@ import org.springframework.data.mongodb.repository.config.EnableMongoRepositorie
 @Configuration
 @EnableMongoRepositories(basePackages = {
         "edu.agh.recipe.recipes.repository",
-        "edu.agh.recipe.tags.repository"
+        "edu.agh.recipe.tags.repository",
+        "edu.agh.recipe.settings.repository"
 })
 public class GridFsConfig {
 

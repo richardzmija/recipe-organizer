@@ -25,7 +25,7 @@ import java.util.List;
 import java.util.Objects;
 
 @Service
-public class DefaultImageService implements ImageService{
+public class DefaultImageService implements ImageService {
 
     private final GridFsTemplate gridFsTemplate;
     private final MongoTemplate mongoTemplate;
@@ -36,12 +36,11 @@ public class DefaultImageService implements ImageService{
     }
 
     public String uploadImage(MultipartFile image, ImageMetadataDTO imageMetadataDTO){
-        try {
-            InputStream inputStream = image.getInputStream();
-            DBObject metadata = toDBObject(imageMetadataDTO);
+        DBObject metadata = toDBObject(imageMetadataDTO);
+        try (InputStream inputStream = image.getInputStream()){
             return gridFsTemplate.store(inputStream, image.getOriginalFilename(), image.getContentType(), metadata).toString();
         } catch (IOException e) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Couldn't upload image");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Couldn't upload image");
         }
     }
 

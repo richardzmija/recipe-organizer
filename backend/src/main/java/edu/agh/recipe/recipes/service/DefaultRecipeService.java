@@ -339,6 +339,11 @@ public class DefaultRecipeService implements RecipeService {
 
         List<TagDTO> tags = tagService.getTagsByIds(new ArrayList<>(savedRecipe.getTagIds()));
         List<ImageDTO> images = imageService.getImagesDataByIds(new ArrayList<>(recipe.getImageIds()));
+
+        if (images.stream().filter((ImageDTO::isPrimary)).toList().isEmpty()) {
+            return setImageAsPrimary(recipeId, images.getFirst().id());
+        }
+
         return RecipeDTO.fromEntity(recipe, tags, images);
     }
 
@@ -359,12 +364,10 @@ public class DefaultRecipeService implements RecipeService {
                     .getFirst()
                     .id();
 
-            if(currentPrimaryId.equals(imageId)){
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Image already primary");
+            if(!currentPrimaryId.equals(imageId)){
+                imageService.setImagePrimary(currentPrimaryId, false);
+                imageService.setImagePrimary(imageId, true);
             }
-
-            imageService.setImagePrimary(currentPrimaryId, false);
-            imageService.setImagePrimary(imageId, true);
         }
 
         Recipe savedRecipe = recipeRepository.save(recipe);
