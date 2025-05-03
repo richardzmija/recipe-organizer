@@ -21,21 +21,20 @@ public class RecipeImportService {
         String title = doc.select("div.title h1").text();
         String description = doc.select("div.article__content blockquote p em").text();
 
-        Elements ingredientElements = doc.select("div.article__content ul li");
+        List<RecipeIngredient> ingredients = doc.select("div.article__content ul li").stream()
+                .map(Element::text)
+                .map(IngredientParser::parse)
+                .toList();
 
-        List<RecipeIngredient> ingredients = new ArrayList<>();
-        for (Element li : ingredientElements) {
-            String rawIngredient = li.text();
-
-            // Póki co: nie próbujemy parsować jednostek ani ilości
-            ingredients.add(new RecipeIngredient(rawIngredient, null, null));
-        }
+//        List<RecipeIngredient> ingredients = new ArrayList<>();
+//        for (Element li : ingredientElements) {
+//            String rawIngredient = li.text();
+//
+//            // Póki co: nie próbujemy parsować jednostek ani ilości
+//            ingredients.add(new RecipeIngredient(rawIngredient, null, null));
+//        }
 
         Elements stepElements = doc.select("div.article__content > p[style=\"text-align: justify;\"]");
-//        for (Element p : stepElements) {
-//            String text = p.text();
-//            System.out.println("- step: " + text);
-//        }
 
         List<RecipeStep> steps = new ArrayList<>();
         for (int i = 0; i < stepElements.size(); i++) {
