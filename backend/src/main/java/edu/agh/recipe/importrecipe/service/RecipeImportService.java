@@ -22,10 +22,6 @@ public class RecipeImportService {
         String description = doc.select("div.article__content blockquote p em").text();
 
         Elements ingredientElements = doc.select("div.article__content ul li");
-        for (Element li : ingredientElements) {
-            String text = li.text();
-            System.out.println("ingredient: " + text);
-        }
 
         List<RecipeIngredient> ingredients = new ArrayList<>();
         for (Element li : ingredientElements) {
@@ -35,20 +31,26 @@ public class RecipeImportService {
             ingredients.add(new RecipeIngredient(rawIngredient, null, null));
         }
 
-        String instructions = doc.select("div.article__content > p[style=\"text-align: justify;\"]").text();
+        Elements stepElements = doc.select("div.article__content > p[style=\"text-align: justify;\"]");
+//        for (Element p : stepElements) {
+//            String text = p.text();
+//            System.out.println("- step: " + text);
+//        }
+
+        List<RecipeStep> steps = new ArrayList<>();
+        for (int i = 0; i < stepElements.size(); i++) {
+            Element step = stepElements.get(i);
+            String text = step.text();
+            steps.add(new RecipeStep("Krok " + (i + 1), text));
+        }
 
         Recipe recipe = new Recipe();
-
-        System.out.println("TITLE: " + title);
-        System.out.println("DESCR: " + description);
-        System.out.println("INGRD: " + ingredients);
-        System.out.println("INSTR: " + instructions);
 
 
         recipe.setName(title);
         recipe.setDescription(description);
         recipe.setIngredients(ingredients);
-        recipe.setSteps(List.of());
+        recipe.setSteps(steps);
 
         // save in database?
 
