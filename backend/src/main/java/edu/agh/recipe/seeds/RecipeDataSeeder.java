@@ -5,6 +5,7 @@ import edu.agh.recipe.recipes.model.RecipeIngredient;
 import edu.agh.recipe.recipes.model.RecipeStep;
 import edu.agh.recipe.recipes.repository.RecipeRepository;
 import edu.agh.recipe.units.domain.MeasurementUnit;
+import edu.agh.recipe.units.domain.Quantity;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -81,7 +82,7 @@ public class RecipeDataSeeder {
             MeasurementUnit unit = MeasurementUnit.values()[random.nextInt(MeasurementUnit.values().length)];
             double quantity = (random.nextInt(20) + 1) * (random.nextBoolean() ? 0.5 : 1.0);
             
-            ingredients.add(new RecipeIngredient(ingredient, unit, quantity));
+            ingredients.add(new RecipeIngredient(ingredient, unit, Quantity.of(quantity)));
         }
         
         // Generate random steps (between 3-8 steps)
@@ -113,7 +114,7 @@ public class RecipeDataSeeder {
             steps.add(new RecipeStep(title, text));
         }
         
-        return new Recipe(name, description, ingredients, steps);
+        return new Recipe(name, description, ingredients, steps, new HashSet<>());
     }
     
     private String getRandomPreparationInstruction() {
