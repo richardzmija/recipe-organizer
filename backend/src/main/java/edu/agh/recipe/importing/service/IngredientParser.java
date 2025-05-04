@@ -1,4 +1,4 @@
-package edu.agh.recipe.importrecipe.service;
+package edu.agh.recipe.importing.service;
 
 import edu.agh.recipe.recipes.model.RecipeIngredient;
 import edu.agh.recipe.units.domain.MeasurementUnit;

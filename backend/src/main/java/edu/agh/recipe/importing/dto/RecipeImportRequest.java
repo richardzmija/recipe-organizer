@@ -1,4 +1,4 @@
-package edu.agh.recipe.importrecipe.dto;
+package edu.agh.recipe.importing.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 

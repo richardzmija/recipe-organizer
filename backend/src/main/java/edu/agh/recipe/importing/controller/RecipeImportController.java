@@ -1,8 +1,8 @@
-package edu.agh.recipe.importrecipe.controller;
+package edu.agh.recipe.importing.controller;
 
-import edu.agh.recipe.importrecipe.dto.RecipeImportPreviewDTO;
-import edu.agh.recipe.importrecipe.dto.RecipeImportRequest;
-import edu.agh.recipe.importrecipe.service.RecipeImportService;
+import edu.agh.recipe.importing.dto.RecipeImportPreviewDTO;
+import edu.agh.recipe.importing.dto.RecipeImportRequest;
+import edu.agh.recipe.importing.service.RecipeImportService;
 import edu.agh.recipe.recipes.model.Recipe;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;

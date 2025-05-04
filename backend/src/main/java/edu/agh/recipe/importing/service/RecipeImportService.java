@@ -1,6 +1,6 @@
-package edu.agh.recipe.importrecipe.service;
+package edu.agh.recipe.importing.service;
 
-import edu.agh.recipe.importrecipe.dto.RecipeImportPreviewDTO;
+import edu.agh.recipe.importing.dto.RecipeImportPreviewDTO;
 import edu.agh.recipe.recipes.model.Recipe;
 import edu.agh.recipe.recipes.model.RecipeIngredient;
 import edu.agh.recipe.recipes.model.RecipeStep;

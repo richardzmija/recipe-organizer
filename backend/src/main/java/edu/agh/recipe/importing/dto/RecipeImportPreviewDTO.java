@@ -1,4 +1,4 @@
-package edu.agh.recipe.importrecipe.dto;
+package edu.agh.recipe.importing.dto;
 
 import edu.agh.recipe.recipes.model.RecipeIngredient;
 import edu.agh.recipe.recipes.model.RecipeStep;
