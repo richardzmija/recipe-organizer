@@ -17,6 +17,8 @@ public class Recipe {
     private List<RecipeIngredient> ingredients = new ArrayList<>();
     private List<RecipeStep> steps = new ArrayList<>();
     private Set<String> tagIds = new HashSet<>();
+    private Set<String> imageIds = new HashSet<>();
+
 
     public Recipe(String name, String description, List<RecipeIngredient> ingredients, List<RecipeStep> steps, Set<String> tagIds) {
         this.name = name;
@@ -81,4 +83,13 @@ public class Recipe {
     public void setTagIds(Set<String> tagIds) {
         this.tagIds = tagIds;
     }
+
+    public Set<String> getImageIds() {
+        return imageIds;
+    }
+
+    public void setImageIds(Set<String> imageIds) {
+        this.imageIds = imageIds;
+    }
+
 }
