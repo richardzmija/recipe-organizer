@@ -44,15 +44,17 @@ public class IngredientParser {
     );
 
     public static RecipeIngredient parse(String line) {
-        Pattern pattern = Pattern.compile("(?<qty>[\\d,./]+)\\s*(?<unit>\\w+)?\\s+(?<name>.+)");
-//        Pattern pattern = Pattern.compile("^(?:(?<qty>[\\d,./\\s]+)\\s*(?<unit>\\w+)?\\s+)?(?<name>.+)$");
+//        Pattern pattern = Pattern.compile("^(?:(?<qty>[\\d,./\\s]+)\\s*(?<unit>\\w+)?\\s+)?(?<name>.+)$"); // NULL CHECKS REQUIRED!
+//        Pattern pattern = Pattern.compile("(?<qty>[\\d,./]+)\\s*(?<unit>\\w+)?\\s+(?<name>.+)");
+        Pattern pattern = Pattern.compile("(?<qty>[\\d,./]+)\\s*(?<unit>[\\p{L}]+)?\\s+(?<name>.+)", Pattern.UNICODE_CHARACTER_CLASS);
+
         Matcher matcher = pattern.matcher(line.trim());
 
         if (matcher.matches()) {
             String quantityStr = Optional.ofNullable(matcher.group("qty"))
                     .map(q -> q.replace(',', '.').trim())
                     .orElse(null);
-            double quantity = quantityStr != null ? parseQuantity(quantityStr) : 1.0;
+            double quantity = quantityStr != null ? parseQuantity(quantityStr) : 0.0;
 
             String unitStr = Optional.ofNullable(matcher.group("unit"))
                     .map(String::trim)

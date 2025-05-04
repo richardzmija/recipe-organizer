@@ -1,8 +1,10 @@
 package edu.agh.recipe.importrecipe.service;
 
+import edu.agh.recipe.importrecipe.dto.RecipeImportPreviewDTO;
 import edu.agh.recipe.recipes.model.Recipe;
 import edu.agh.recipe.recipes.model.RecipeIngredient;
 import edu.agh.recipe.recipes.model.RecipeStep;
+import edu.agh.recipe.recipes.repository.RecipeRepository;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -15,6 +17,8 @@ import java.util.List;
 
 @Service
 public class RecipeImportService {
+    private final RecipeRepository recipeRepository;
+
     public Recipe importFromMojewypieki(String url) throws IOException {
         Document doc = Jsoup.connect(url).get();
 
@@ -40,7 +44,7 @@ public class RecipeImportService {
         for (int i = 0; i < stepElements.size(); i++) {
             Element step = stepElements.get(i);
             String text = step.text();
-            steps.add(new RecipeStep("Krok " + (i + 1), text));
+            steps.add(new RecipeStep("Step " + (i + 1), text));
         }
 
         Recipe recipe = new Recipe();
@@ -54,5 +58,26 @@ public class RecipeImportService {
         // save in database?
 
         return recipe;
+    }
+
+    public RecipeImportPreviewDTO previewFromMojewypieki(String url) throws IOException {
+        Recipe recipe = importFromMojewypieki(url);
+
+        return new RecipeImportPreviewDTO(
+                recipe.getName(),
+                recipe.getDescription(),
+                recipe.getIngredients(),
+                recipe.getSteps()
+        );
+    }
+
+
+    public RecipeImportService(RecipeRepository recipeRepository) {
+        this.recipeRepository = recipeRepository;
+    }
+
+    public Recipe importAndSaveFromMojewypieki(String url) throws IOException {
+        Recipe recipe = importFromMojewypieki(url);
+        return recipeRepository.save(recipe);
     }
 }
