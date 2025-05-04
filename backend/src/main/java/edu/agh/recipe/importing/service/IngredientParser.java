@@ -70,7 +70,7 @@ public class IngredientParser {
             }
         }
 
-        return new RecipeIngredient(line, null, null);
+        return new RecipeIngredient(line, null, Quantity.of(0.0));
     }
 
     private static double parseQuantity(String input) {

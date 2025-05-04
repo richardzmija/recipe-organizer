@@ -12,13 +12,10 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/recipes/import")
+@RequestMapping("/recipes/import")
 @Tag(name = "Recipe Import", description = "Recipe import APIs")
 public class RecipeImportController {
 
@@ -49,7 +46,7 @@ public class RecipeImportController {
         }
     }
 
-    @PostMapping("/preview")
+    @PostMapping("mojewypieki/preview")
     @Operation(summary = "Preview a recipe from mojewypieki.com (no DB save)")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Preview generated",
@@ -58,13 +55,13 @@ public class RecipeImportController {
             @ApiResponse(responseCode = "400", description = "Unsupported URL"),
             @ApiResponse(responseCode = "500", description = "Internal error")
     })
-    public ResponseEntity<?> previewRecipe(@RequestBody RecipeImportRequest request) {
-        if (!request.getUrl().contains("mojewypieki.com")) {
+    public ResponseEntity<?> previewRecipe(@RequestParam String url) {
+        if (!url.contains("mojewypieki.com")) {
             return ResponseEntity.badRequest().body("Only mojewypieki.com is supported at this time.");
         }
 
         try {
-            RecipeImportPreviewDTO preview = recipeImportService.previewFromMojewypieki(request.getUrl());
+            RecipeImportPreviewDTO preview = recipeImportService.previewFromMojewypieki(url);
             return ResponseEntity.ok(preview);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -73,7 +70,7 @@ public class RecipeImportController {
     }
 
 
-    @PostMapping("/save")
+    @PostMapping("/mojewypieki")
     @Operation(summary = "Import and save a recipe from mojewypieki.com")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Recipe imported and saved",
@@ -81,13 +78,13 @@ public class RecipeImportController {
             @ApiResponse(responseCode = "400", description = "Unsupported URL"),
             @ApiResponse(responseCode = "500", description = "Internal error")
     })
-    public ResponseEntity<?> importAndSaveRecipe(@RequestBody RecipeImportRequest request) {
-        if (!request.getUrl().contains("mojewypieki.com")) {
+    public ResponseEntity<?> importAndSaveRecipe(@RequestParam String url) {
+        if (!url.contains("mojewypieki.com")) {
             return ResponseEntity.badRequest().body("Only mojewypieki.com is supported at this time.");
         }
 
         try {
-            Recipe recipe = recipeImportService.importAndSaveFromMojewypieki(request.getUrl());
+            Recipe recipe = recipeImportService.importAndSaveFromMojewypieki(url);
             return ResponseEntity.ok(recipe);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)

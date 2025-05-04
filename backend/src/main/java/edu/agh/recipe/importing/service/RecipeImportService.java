@@ -30,14 +30,6 @@ public class RecipeImportService {
                 .map(IngredientParser::parse)
                 .toList();
 
-//        List<RecipeIngredient> ingredients = new ArrayList<>();
-//        for (Element li : ingredientElements) {
-//            String rawIngredient = li.text();
-//
-//            // Póki co: nie próbujemy parsować jednostek ani ilości
-//            ingredients.add(new RecipeIngredient(rawIngredient, null, null));
-//        }
-
         Elements stepElements = doc.select("div.article__content > p[style=\"text-align: justify;\"]");
 
         List<RecipeStep> steps = new ArrayList<>();
