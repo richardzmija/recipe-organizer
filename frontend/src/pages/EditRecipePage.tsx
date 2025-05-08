@@ -80,8 +80,8 @@ const EditRecipePage: FC = () => {
       description={recipe.description}
       ingredients={recipe.ingredients}
       steps={recipe.steps}
-      image={recipe.image}
       tags={recipe.tags}
+      images={recipe.images}
       name={recipe.name.replace(/<[^>]*>?/gm, '')}
       onCancel={() => navigate('/')}
     />
