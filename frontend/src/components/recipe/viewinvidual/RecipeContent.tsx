@@ -15,12 +15,7 @@ export const RecipeContent = ({ recipe }: RecipeContentProps) => (
         {recipe.tags && recipe.tags.length > 0 && (
           <HStack spaceX={2} mb={4}>
             {recipe.tags.map((tag) => (
-              <Badge
-                key={tag.id}
-                colorPalette='orange'
-                variant='surface'
-                shadow='sm'
-                style={{ backgroundColor: tag.color }}>
+              <Badge key={tag.id} variant='surface' shadow='sm' style={{ backgroundColor: tag.color }}>
                 {tag.name}
               </Badge>
             ))}
