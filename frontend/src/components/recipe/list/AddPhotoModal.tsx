@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { Box, Button, Dialog, Input, Text, VStack, CloseButton, Portal, Spinner } from '@chakra-ui/react';
+import { Box, Button, Dialog, Input, Text, VStack, CloseButton, Portal, Spinner, HStack } from '@chakra-ui/react';
 import { toaster } from '@/components/ui/toaster';
 import { LuUpload } from 'react-icons/lu';
 import { MdAddAPhoto } from 'react-icons/md';
@@ -133,7 +133,19 @@ const AddPhotoModal = ({ recipeId, recipeName, onSuccess }: AddPhotoModalProps) 
                       accept='image/*'
                       onChange={handleFileChange}
                       onClick={(e) => e.stopPropagation()}
+                      display='none'
                     />
+                    <Button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        fileInputRef.current?.click();
+                      }}
+                      w='100%'>
+                      <HStack>
+                        <LuUpload />
+                        <Text>Choose Image File</Text>
+                      </HStack>
+                    </Button>
                   </Box>
 
                   {previewUrl && (
