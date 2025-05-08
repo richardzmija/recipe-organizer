@@ -8,6 +8,7 @@ import ImageInput from './ImageInput';
 import TagInput from './TagInput';
 import { Ingredient } from '@/types/Ingredient';
 import { Step } from '@/types/Step';
+import { Tag } from '@/types/Tag';
 import TextEditor from '@/components/common/TextEditor';
 import RecipeContent from '../viewinvidual/RecipeContent';
 import { Recipe } from '@/types/Recipe';
@@ -17,7 +18,7 @@ interface Props {
   name?: string;
   description?: string;
   image?: string;
-  tags?: string[];
+  tags?: Tag[];
   ingredients?: Ingredient[];
   steps?: Step[];
   onCancel: () => void;
@@ -28,7 +29,7 @@ const RecipeCreateForm: FC<Props> = (props: Props) => {
   const [name, setName] = useState(props.name || '');
   const [description, setDescription] = useState(props.description || '');
   const [image, setImage] = useState(props.image || '');
-  const [tags, setTags] = useState<string[]>(props.tags || []);
+  const [tags, setTags] = useState<Tag[]>(props.tags || []);
   const [ingredients, setIngredients] = useState<Ingredient[]>(props.ingredients || []);
   const [steps, setSteps] = useState<Step[]>(props.steps || []);
   const [showPreview, setShowPreview] = useState(false);
@@ -44,11 +45,16 @@ const RecipeCreateForm: FC<Props> = (props: Props) => {
       return;
     }
 
+    const tagReferences = tags.map((tag) => ({
+      id: tag.id,
+    }));
+
     const payload = {
       name,
       description,
       ingredients,
       steps,
+      tags: tagReferences,
     };
 
     try {
@@ -118,7 +124,6 @@ const RecipeCreateForm: FC<Props> = (props: Props) => {
 
         <ImageInput value={image} onChange={setImage} />
 
-        <Text fontWeight='bold'>Tags</Text>
         <TagInput tags={tags} onChange={setTags} />
 
         <Text fontWeight='bold'>Ingredients</Text>

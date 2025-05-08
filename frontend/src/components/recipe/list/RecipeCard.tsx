@@ -86,12 +86,7 @@ const RecipeCard = ({ recipe, onDelete, onSelect, onUnselect }: RecipeCardProps)
             {recipe.tags && recipe.tags.length > 0 && (
               <HStack gap={2} mb={4}>
                 {recipe.tags.map((tag) => (
-                  <Badge
-                    key={tag.id}
-                    colorPalette='orange'
-                    variant='subtle'
-                    shadow='sm'
-                    style={{ backgroundColor: tag.color }}>
+                  <Badge key={tag.id} variant='subtle' shadow='sm' style={{ backgroundColor: tag.color }}>
                     {tag.name}
                   </Badge>
                 ))}
