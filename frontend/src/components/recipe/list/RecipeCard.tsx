@@ -32,6 +32,9 @@ const RecipeCard = ({ recipe, onDelete, onSelect, onUnselect }: RecipeCardProps)
   const navigate = useNavigate();
   const closeRef = useRef<HTMLButtonElement>(null);
 
+  const primaryImage = recipe.images && (recipe.images.find((img) => img.isPrimary) || recipe.images[0]);
+  const imageUrl = primaryImage ? `http://localhost:8080/api/images/${primaryImage.id}/image` : null;
+
   const handleCardClick = () => {
     navigate(`/recipes/${recipe.id}`);
   };
@@ -117,15 +120,10 @@ const RecipeCard = ({ recipe, onDelete, onSelect, onUnselect }: RecipeCardProps)
             </HStack>
           </Box>
 
-          {/* eslint-disable-next-line no-constant-binary-expression */}
-          {(recipe.image || true) && ( // placeholder for now TODO: remove
+          {imageUrl && (
             <Box flex='1' height={{ base: '100px', md: '140px' }} maxW={{ md: '300px' }}>
               <img
-                // src={
-                //   recipe.image ||
-                //   'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=1000&auto=format&fit=crop'
-                // }
-                src={recipe.image}
+                src={imageUrl}
                 alt={recipe.name}
                 style={{
                   objectFit: 'cover',

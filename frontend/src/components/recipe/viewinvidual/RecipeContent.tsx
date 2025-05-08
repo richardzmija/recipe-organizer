@@ -1,6 +1,7 @@
-import { VStack, Heading, Text, List, Flex, HStack, Badge, Separator, Box, Image, Card } from '@chakra-ui/react';
+import { VStack, Heading, Text, List, Flex, HStack, Badge, Separator, Box, Card } from '@chakra-ui/react';
 import StepNavigator from './StepNavigator';
 import { Recipe } from '../../../types/Recipe';
+import ImageCarousel from './ImageCarousel';
 
 interface RecipeContentProps {
   recipe: Recipe;
@@ -29,9 +30,9 @@ export const RecipeContent = ({ recipe }: RecipeContentProps) => (
 
         {recipe.description && <Text fontSize='md' dangerouslySetInnerHTML={{ __html: recipe.description }} />}
       </Box>
-      {recipe.image && (
+      {recipe.images && recipe.images.length > 0 && (
         <Box flex='1'>
-          <Image src={recipe.image} />
+          <ImageCarousel images={recipe.images} />
         </Box>
       )}
     </Flex>
