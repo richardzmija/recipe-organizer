@@ -20,6 +20,7 @@ import { FaEdit } from 'react-icons/fa';
 import { MdDeleteForever } from 'react-icons/md';
 import { toaster } from '@/components/ui/toaster';
 import { useRef } from 'react';
+import { usePaginationContext } from '@/hooks/PaginationContext';
 
 interface RecipeCardProps {
   recipe: Recipe;
@@ -31,13 +32,16 @@ interface RecipeCardProps {
 const RecipeCard = ({ recipe, onDelete, onSelect, onUnselect }: RecipeCardProps) => {
   const navigate = useNavigate();
   const closeRef = useRef<HTMLButtonElement>(null);
+  const { setScrollY } = usePaginationContext();
 
   const handleCardClick = () => {
     navigate(`/recipes/${recipe.id}`);
+    setScrollY(window.scrollY);
   };
 
   const handleEditIconClick = () => {
     navigate(`recipes/edit/${recipe.id}`);
+    setScrollY(window.scrollY);
   };
 
   const handleDeleteConfirmation = async (e: React.MouseEvent<HTMLButtonElement>) => {
