@@ -7,7 +7,10 @@
     "start:frontend": "cd frontend && npm run dev",
     "start:backend": "cd backend && docker compose -f compose.yaml -p backend up -d app",
     "setup": "npm i && npm run setup:frontend",
-    "setup:frontend": "cd frontend && npm i"
+    "setup:frontend": "cd frontend && npm i",
+    "db:nuke": "cd backend && docker compose -f compose.yaml -p backend exec mongodb mongosh --username root --password my-password --authenticationDatabase admin --eval 'db.getSiblingDB(\"recipe-organizer\").dropDatabase()'",
+    "db:reset": "cd backend && docker compose -f compose.yaml -p backend up -d mongodb && sleep 5 && npm run db:nuke",
+    "backend:reset": "cd backend && docker compose -f compose.yaml -p backend stop app && docker compose -f compose.yaml -p backend build app && docker compose -f compose.yaml -p backend up -d app"
   },
   "lint-staged": {
     "frontend/**/*.{ts,tsx,js,jsx,html,css}": [
