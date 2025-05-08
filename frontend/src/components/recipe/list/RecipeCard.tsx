@@ -38,6 +38,7 @@ const RecipeCard = ({ recipe, onDelete, onSelect, onUnselect }: RecipeCardProps)
   const primaryImage = recipe.images && (recipe.images.find((img) => img.isPrimary) || recipe.images[0]);
   const imageUrl = primaryImage ? `http://localhost:8080/api/images/${primaryImage.id}/image` : null;
 
+
   const handleCardClick = () => {
     navigate(`/recipes/${recipe.id}`);
   };
