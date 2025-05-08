@@ -377,6 +377,31 @@ public class DefaultRecipeService implements RecipeService {
         return RecipeDTO.fromEntity(recipe, tags, images);
     }
 
+    @Override
+    public RecipeDTO linkImagesToRecipe(String recipeId, List<String> imageIds) {
+        Recipe recipe = recipeRepository.findById(recipeId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Recipe not found."));
+
+        List<ImageDTO> imageDTOs = imageService.getImagesDataByIds(imageIds);
+        if (imageDTOs.size() != imageIds.size()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "One or more image IDs are invalid");
+        }
+
+        Set<String> existingImageIds = new HashSet<>(recipe.getImageIds());
+        existingImageIds.addAll(imageIds);
+        recipe.setImageIds(existingImageIds);
+
+        Recipe savedRecipe = recipeRepository.save(recipe);
+
+        if (imageDTOs.stream().noneMatch(ImageDTO::isPrimary) && !existingImageIds.isEmpty()) {
+            return setImageAsPrimary(recipeId, imageIds.get(0));
+        }
+
+        List<TagDTO> tags = tagService.getTagsByIds(new ArrayList<>(savedRecipe.getTagIds()));
+        List<ImageDTO> images = imageService.getImagesDataByIds(new ArrayList<>(savedRecipe.getImageIds()));
+        return RecipeDTO.fromEntity(savedRecipe, tags, images);
+    }
+
     /**
      * Process tag references - either use existing tags or create new ones.
      */

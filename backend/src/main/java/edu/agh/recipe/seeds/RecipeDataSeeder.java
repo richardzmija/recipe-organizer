@@ -1,15 +1,25 @@
 package edu.agh.recipe.seeds;
 
+import edu.agh.recipe.images.dto.ImageMetadataDTO;
+import edu.agh.recipe.images.service.ImageService;
 import edu.agh.recipe.recipes.model.Recipe;
 import edu.agh.recipe.recipes.model.RecipeIngredient;
 import edu.agh.recipe.recipes.model.RecipeStep;
 import edu.agh.recipe.recipes.repository.RecipeRepository;
+import edu.agh.recipe.tags.model.Tag;
+import edu.agh.recipe.tags.repository.TagRepository;
 import edu.agh.recipe.units.domain.MeasurementUnit;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.data.mongodb.gridfs.GridFsTemplate;
+import com.mongodb.BasicDBObject;
+import com.mongodb.DBObject;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.*;
 
 @Configuration
@@ -17,6 +27,41 @@ import java.util.*;
 public class RecipeDataSeeder {
 
     private final Random random = new Random();
+    private final TagRepository tagRepository;
+    private final ImageService imageService;
+    private final GridFsTemplate gridFsTemplate;
+    
+    // Lists of common recipe tags
+    private final List<String> commonTags = Arrays.asList(
+            "Vegetarian", "Vegan", "Gluten-Free", "Dairy-Free", "Low-Carb", 
+            "Keto", "Paleo", "Mediterranean", "Asian", "Italian", 
+            "Mexican", "Indian", "Breakfast", "Lunch", "Dinner", 
+            "Dessert", "Appetizer", "Soup", "Salad", "Snack", 
+            "Quick", "Easy", "Healthy", "Comfort Food", "Spicy"
+    );
+    
+    // Tag colors
+    private final List<String> tagColors = Arrays.asList(
+            "#FF5733", "#33FF57", "#3357FF", "#F033FF", "#FF33A6",
+            "#33FFF0", "#FFF033", "#FF8333", "#33FFD4", "#D433FF"
+    );
+
+    // Food images stored in resources folder for recipe seeding
+    // Random images will be selected from this list and attached to each recipe
+    private final List<String> sampleImagePaths = Arrays.asList(
+            "seed-images/food1.jpg",
+            "seed-images/food2.jpg",
+            "seed-images/food3.jpg",
+            "seed-images/food4.jpg",
+            "seed-images/food5.jpg",
+            "seed-images/food6.jpg"
+    );
+    
+    public RecipeDataSeeder(TagRepository tagRepository, ImageService imageService, GridFsTemplate gridFsTemplate) {
+        this.tagRepository = tagRepository;
+        this.imageService = imageService;
+        this.gridFsTemplate = gridFsTemplate;
+    }
     
     // Lists of common recipe ingredients
     private final List<String> commonIngredients = Arrays.asList(
@@ -81,7 +126,7 @@ public class RecipeDataSeeder {
             MeasurementUnit unit = MeasurementUnit.values()[random.nextInt(MeasurementUnit.values().length)];
             double quantity = (random.nextInt(20) + 1) * (random.nextBoolean() ? 0.5 : 1.0);
             
-            ingredients.add(new RecipeIngredient(ingredient, unit, quantity));
+            ingredients.add(RecipeIngredient.of(ingredient, unit, quantity));
         }
         
         // Generate random steps (between 3-8 steps)
@@ -113,7 +158,10 @@ public class RecipeDataSeeder {
             steps.add(new RecipeStep(title, text));
         }
         
-        return new Recipe(name, description, ingredients, steps);
+        // Get random tags for the recipe
+        Set<String> tagIds = getRandomTagIds(2, 5);
+        
+        return new Recipe(name, description, ingredients, steps, tagIds);
     }
     
     private String getRandomPreparationInstruction() {
@@ -183,6 +231,108 @@ public class RecipeDataSeeder {
         return instructions.get(random.nextInt(instructions.size()));
     }
     
+    // Method to seed tag data and return random tag IDs
+    private Set<String> getRandomTagIds(int minTags, int maxTags) {
+        // First ensure we have tags in the database
+        seedTags();
+        
+        // Get all tags from the database
+        List<Tag> allTags = tagRepository.findAll();
+        
+        if (allTags.isEmpty()) {
+            return new HashSet<>();
+        }
+        
+        // Select random number of tags between min and max
+        int tagCount = random.nextInt(maxTags - minTags + 1) + minTags;
+        tagCount = Math.min(tagCount, allTags.size());
+        
+        // Shuffle the list and take the first 'tagCount' elements
+        Collections.shuffle(allTags);
+        
+        Set<String> selectedTagIds = new HashSet<>();
+        for (int i = 0; i < tagCount; i++) {
+            selectedTagIds.add(allTags.get(i).getId());
+        }
+        
+        return selectedTagIds;
+    }
+    
+    // Method to seed tags if they don't exist
+    private void seedTags() {
+        // Check if we already have tags
+        if (tagRepository.count() > 0) {
+            return;
+        }
+        
+        List<Tag> tags = new ArrayList<>();
+        for (String tagName : commonTags) {
+            String color = tagColors.get(random.nextInt(tagColors.size()));
+            String description = "Tag for " + tagName.toLowerCase() + " recipes";
+            String category = getCategoryForTag(tagName);
+            
+            tags.add(new Tag(tagName, color, description, category));
+        }
+        
+        tagRepository.saveAll(tags);
+        System.out.println("Seeded database with " + tags.size() + " tags");
+    }
+    
+    // Helper method to categorize tags
+    private String getCategoryForTag(String tagName) {
+        if (List.of("Vegetarian", "Vegan", "Gluten-Free", "Dairy-Free", "Low-Carb", "Keto", "Paleo").contains(tagName)) {
+            return "Dietary";
+        } else if (List.of("Mediterranean", "Asian", "Italian", "Mexican", "Indian").contains(tagName)) {
+            return "Cuisine";
+        } else if (List.of("Breakfast", "Lunch", "Dinner", "Dessert", "Appetizer", "Soup", "Salad", "Snack").contains(tagName)) {
+            return "Meal Type";
+        } else {
+            return "Other";
+        }
+    }
+    
+    // Method to add images to a recipe using GridFsTemplate directly
+    private Set<String> addImagesToRecipe(String recipeId) {
+        Set<String> imageIds = new HashSet<>();
+        
+        try {
+            // Add 1-3 images per recipe
+            int imageCount = random.nextInt(3) + 1;
+            
+            for (int i = 0; i < imageCount; i++) {
+                // Get a random sample image
+                String imagePath = sampleImagePaths.get(random.nextInt(sampleImagePaths.size()));
+                
+                // Load the image from resources
+                ClassPathResource resource = new ClassPathResource(imagePath);
+                
+                try (InputStream inputStream = resource.getInputStream()) {
+                    // Create metadata
+                    DBObject metadata = new BasicDBObject();
+                    metadata.put("recipeId", recipeId);
+                    metadata.put("description", "Image for " + recipeId);
+                    metadata.put("isPrimary", i == 0); // First image is primary
+                    metadata.put("uploadDate", new Date());
+                    
+                    // Store the image directly using GridFsTemplate
+                    String filename = imagePath.substring(imagePath.lastIndexOf('/') + 1);
+                    String imageId = gridFsTemplate.store(
+                            inputStream, 
+                            filename,
+                            "image/jpeg", 
+                            metadata
+                    ).toString();
+                    
+                    imageIds.add(imageId);
+                }
+            }
+        } catch (IOException e) {
+            System.err.println("Error adding images to recipe: " + e.getMessage());
+        }
+        
+        return imageIds;
+    }
+    
     @Bean
     public CommandLineRunner seedDatabaseWithRecipes(RecipeRepository recipeRepository) {
         return args -> {
@@ -200,9 +350,19 @@ public class RecipeDataSeeder {
                 recipes.add(generateRandomRecipe());
             }
             
-            recipeRepository.saveAll(recipes);
+            // First save recipes to get their IDs
+            List<Recipe> savedRecipes = recipeRepository.saveAll(recipes);
             
-            System.out.println("Database seeded successfully with 20 recipes.");
+            // Then add images to each recipe
+            for (Recipe recipe : savedRecipes) {
+                Set<String> imageIds = addImagesToRecipe(recipe.getId());
+                recipe.setImageIds(imageIds);
+            }
+            
+            // Update recipes with image IDs
+            recipeRepository.saveAll(savedRecipes);
+            
+            System.out.println("Database seeded successfully with 20 recipes and their images.");
         };
     }
 } 
