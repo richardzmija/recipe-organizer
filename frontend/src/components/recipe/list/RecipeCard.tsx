@@ -85,9 +85,14 @@ const RecipeCard = ({ recipe, onDelete, onSelect, onUnselect }: RecipeCardProps)
 
             {recipe.tags && recipe.tags.length > 0 && (
               <HStack gap={2} mb={4}>
-                {recipe.tags.map((tag, index) => (
-                  <Badge key={index} colorPalette='orange' variant='subtle' shadow='sm'>
-                    {tag}
+                {recipe.tags.map((tag) => (
+                  <Badge
+                    key={tag.id}
+                    colorPalette='orange'
+                    variant='subtle'
+                    shadow='sm'
+                    style={{ backgroundColor: tag.color }}>
+                    {tag.name}
                   </Badge>
                 ))}
               </HStack>
@@ -121,10 +126,11 @@ const RecipeCard = ({ recipe, onDelete, onSelect, onUnselect }: RecipeCardProps)
           {(recipe.image || true) && ( // placeholder for now TODO: remove
             <Box flex='1' height={{ base: '100px', md: '140px' }} maxW={{ md: '300px' }}>
               <img
-                src={
-                  recipe.image ||
-                  'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=1000&auto=format&fit=crop'
-                }
+                // src={
+                //   recipe.image ||
+                //   'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=1000&auto=format&fit=crop'
+                // }
+                src={recipe.image}
                 alt={recipe.name}
                 style={{
                   objectFit: 'cover',
