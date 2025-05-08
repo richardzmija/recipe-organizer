@@ -20,6 +20,7 @@ import { FaEdit } from 'react-icons/fa';
 import { MdDeleteForever } from 'react-icons/md';
 import { toaster } from '@/components/ui/toaster';
 import { useRef } from 'react';
+import AddPhotoModal from './AddPhotoModal';
 
 interface RecipeCardProps {
   recipe: Recipe;
@@ -41,6 +42,10 @@ const RecipeCard = ({ recipe, onDelete, onSelect, onUnselect }: RecipeCardProps)
 
   const handleEditIconClick = () => {
     navigate(`recipes/edit/${recipe.id}`);
+  };
+
+  const handlePhotoUploadSuccess = () => {
+    window.location.reload();
   };
 
   const handleDeleteConfirmation = async (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -136,15 +141,20 @@ const RecipeCard = ({ recipe, onDelete, onSelect, onUnselect }: RecipeCardProps)
             </Box>
           )}
           <Separator size={'md'} orientation={'vertical'} marginLeft={3} marginRight={3} alignSelf={'stretch'} />
-          <VStack alignSelf={'stretch'}>
+          <VStack alignSelf={'stretch'} gap={2}>
             <IconButton
               onClick={(e) => {
                 e.stopPropagation();
                 handleEditIconClick();
               }}
-              size={'xs'}>
+              size={'sm'}
+              width='32px'
+              height='32px'
+              aria-label='Edit recipe'>
               <FaEdit />
             </IconButton>
+
+            <AddPhotoModal recipeId={recipe.id ?? ''} recipeName={recipe.name} onSuccess={handlePhotoUploadSuccess} />
 
             <Dialog.Root>
               <Dialog.Trigger asChild>
@@ -152,7 +162,10 @@ const RecipeCard = ({ recipe, onDelete, onSelect, onUnselect }: RecipeCardProps)
                   onClick={(e) => {
                     e.stopPropagation();
                   }}
-                  size={'xs'}>
+                  size={'sm'}
+                  width='32px'
+                  height='32px'
+                  aria-label='Delete recipe'>
                   <MdDeleteForever />
                 </IconButton>
               </Dialog.Trigger>
