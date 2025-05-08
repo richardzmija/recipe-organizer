@@ -117,7 +117,7 @@ const AddPhotoModal = ({ recipeId, recipeName, onSuccess }: AddPhotoModalProps) 
               <Dialog.Header>
                 <Dialog.Title>Add Photo to {recipeName}</Dialog.Title>
                 <Dialog.CloseTrigger asChild>
-                  <CloseButton size='sm' ref={closeRef} />
+                  <CloseButton size='sm' ref={closeRef} onClick={handleClose} />
                 </Dialog.CloseTrigger>
               </Dialog.Header>
 
