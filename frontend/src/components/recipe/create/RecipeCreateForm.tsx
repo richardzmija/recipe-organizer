@@ -4,23 +4,22 @@ import { FC, useState } from 'react';
 import { toaster } from '@/components/ui/toaster';
 import IngredientFields from './IngredientFields';
 import StepFields from './StepFields';
-import ImageInput from './ImageInput';
 import TagInput from './TagInput';
 import { Ingredient } from '@/types/Ingredient';
 import { Step } from '@/types/Step';
 import { Tag } from '@/types/Tag';
 import TextEditor from '@/components/common/TextEditor';
 import RecipeContent from '../viewinvidual/RecipeContent';
-import { Recipe } from '@/types/Recipe';
+import { Recipe, Image } from '@/types/Recipe';
 
 interface Props {
   id?: string;
   name?: string;
   description?: string;
-  image?: string;
   tags?: Tag[];
   ingredients?: Ingredient[];
   steps?: Step[];
+  images?: Image[];
   onCancel: () => void;
   mode: 'edit' | 'create';
 }
@@ -28,10 +27,10 @@ interface Props {
 const RecipeCreateForm: FC<Props> = (props: Props) => {
   const [name, setName] = useState(props.name || '');
   const [description, setDescription] = useState(props.description || '');
-  const [image, setImage] = useState(props.image || '');
   const [tags, setTags] = useState<Tag[]>(props.tags || []);
   const [ingredients, setIngredients] = useState<Ingredient[]>(props.ingredients || []);
   const [steps, setSteps] = useState<Step[]>(props.steps || []);
+  const [images] = useState(props.images || []);
   const [showPreview, setShowPreview] = useState(false);
   const { onCancel, mode } = props;
 
@@ -58,19 +57,51 @@ const RecipeCreateForm: FC<Props> = (props: Props) => {
     };
 
     try {
-      if (mode === 'create')
-        await fetch('http://localhost:8080/api/recipes', {
+      let savedRecipeId = '';
+
+      if (mode === 'create') {
+        const response = await fetch('http://localhost:8080/api/recipes', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload),
         });
 
-      if (mode === 'edit')
-        await fetch(`http://localhost:8080/api/recipes/${props.id}`, {
+        if (response.ok) {
+          const data = await response.json();
+          savedRecipeId = data.id;
+        }
+      }
+
+      if (mode === 'edit') {
+        const response = await fetch(`http://localhost:8080/api/recipes/${props.id}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload),
         });
+
+        if (response.ok) {
+          savedRecipeId = props.id as string;
+
+          if (images && images.length > 0) {
+            try {
+              const imageIdsToPreserve = images.map((img) => img.id);
+
+              await fetch(`http://localhost:8080/api/recipes/${savedRecipeId}/images/link`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(imageIdsToPreserve),
+              });
+            } catch (imageError) {
+              console.error('Error preserving images:', imageError);
+              toaster.create({
+                title: 'Warning',
+                description: 'Recipe was updated but there was an issue preserving the images',
+                type: 'warning',
+              });
+            }
+          }
+        }
+      }
 
       toaster.create({
         title: 'Success',
@@ -107,7 +138,7 @@ const RecipeCreateForm: FC<Props> = (props: Props) => {
     id: 'preview',
     name,
     description,
-    image,
+    images: images,
     tags,
     ingredients,
     steps,
@@ -121,9 +152,7 @@ const RecipeCreateForm: FC<Props> = (props: Props) => {
 
         <Text fontWeight='bold'>Description</Text>
         <TextEditor value={description} onChange={setDescription} height='150px' />
-
-        <ImageInput value={image} onChange={setImage} />
-
+        
         <TagInput tags={tags} onChange={setTags} />
 
         <Text fontWeight='bold'>Ingredients</Text>
