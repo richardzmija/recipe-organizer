@@ -31,9 +31,18 @@ interface RecipeCardProps {
   onUnselect: () => void;
   isFavorite: boolean;
   onToggleFavorite: () => void;
+  onPhotoUploadSuccess: () => void;
 }
 
-const RecipeCard = ({ recipe, onDelete, onSelect, onUnselect, isFavorite, onToggleFavorite }: RecipeCardProps) => {
+const RecipeCard = ({
+  recipe,
+  onDelete,
+  onSelect,
+  onUnselect,
+  isFavorite,
+  onToggleFavorite,
+  onPhotoUploadSuccess,
+}: RecipeCardProps) => {
   const navigate = useNavigate();
   const closeRef = useRef<HTMLButtonElement>(null);
   const { setScrollY } = usePaginationContext();
@@ -53,7 +62,8 @@ const RecipeCard = ({ recipe, onDelete, onSelect, onUnselect, isFavorite, onTogg
   };
 
   const handlePhotoUploadSuccess = () => {
-    window.location.reload();
+    setScrollY(window.scrollY);
+    onPhotoUploadSuccess();
   };
 
   const handleExport = (format: 'json' | 'markdown') => {

@@ -8,6 +8,7 @@ import { usePaginationContext } from '@/hooks/PaginationContext';
 
 interface Props {
   refreshSignal: number;
+  onRefresh: () => void;
 }
 
 interface PaginatedResponse {
@@ -28,7 +29,7 @@ interface FilterParams {
   ingredients: string[];
 }
 
-export default function RecipeList({ refreshSignal }: Props) {
+export default function RecipeList({ refreshSignal, onRefresh }: Props) {
   const FAVORITES_KEY = 'favoriteRecipeIds';
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
@@ -279,6 +280,7 @@ export default function RecipeList({ refreshSignal }: Props) {
                 onToggleFavorite={() => {
                   if (recipe.id) handleToggleFavorite(recipe.id);
                 }}
+                onPhotoUploadSuccess={onRefresh}
               />
             ))}
           </VStack>
