@@ -290,7 +290,7 @@ public class RecipeDataSeeder {
             return "Other";
         }
     }
-    
+
     // Method to add images to a recipe using GridFsTemplate directly
     private Set<String> addImagesToRecipe(String recipeId) {
         Set<String> imageIds = new HashSet<>();
@@ -332,7 +332,6 @@ public class RecipeDataSeeder {
         
         return imageIds;
     }
-    
     @Bean
     public CommandLineRunner seedDatabaseWithRecipes(RecipeRepository recipeRepository) {
         return args -> {
