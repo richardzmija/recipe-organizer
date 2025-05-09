@@ -46,5 +46,6 @@ public interface RecipeService {
     RecipeDTO uploadImageForRecipe(String recipeId, String description, MultipartFile image);
     RecipeDTO removeImageFromRecipe(String id, String imageId);
     RecipeDTO setImageAsPrimary(String id, String imageId);
+    RecipeDTO linkImagesToRecipe(String recipeId, List<String> imageIds);
 
 }

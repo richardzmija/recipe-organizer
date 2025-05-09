@@ -14,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
 import java.util.Objects;
 
 @RestController
@@ -92,5 +93,24 @@ public class RecipeImageController {
             @PathVariable String imageId
     ) {
         return ResponseEntity.ok(recipeService.setImageAsPrimary(id, imageId));
+    }
+
+    @Operation(
+            summary = "Link existing images to recipe.",
+            description = "Adds existing images to a recipe without uploading new files."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Images linked successfully",
+                    content = @Content(schema = @Schema(implementation = RecipeDTO.class))),
+            @ApiResponse(responseCode = "404", description = "Recipe not found", content = @Content),
+            @ApiResponse(responseCode = "400", description = "Invalid image IDs", content = @Content)
+    })
+    @PatchMapping("/{id}/images/link")
+    public ResponseEntity<RecipeDTO> linkImagesToRecipe(
+            @Parameter(description = "Recipe identifier", required = true)
+            @PathVariable String id,
+            @RequestBody List<String> imageIds
+    ) {
+        return ResponseEntity.ok(recipeService.linkImagesToRecipe(id, imageIds));
     }
 }

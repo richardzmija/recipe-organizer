@@ -14,13 +14,14 @@ import {
   CloseButton,
   Portal,
   Checkbox,
+  Menu,
 } from '@chakra-ui/react';
 import { Recipe } from '../../../types/Recipe';
-import { FaEdit } from 'react-icons/fa';
-import { FaStar, FaRegStar } from 'react-icons/fa';
+import { FaEdit, FaStar, FaRegStar, FaFileExport } from 'react-icons/fa';
 import { MdDeleteForever } from 'react-icons/md';
 import { toaster } from '@/components/ui/toaster';
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
+import AddPhotoModal from './AddPhotoModal';
 
 interface RecipeCardProps {
   recipe: Recipe;
@@ -34,6 +35,11 @@ interface RecipeCardProps {
 const RecipeCard = ({ recipe, onDelete, onSelect, onUnselect, isFavorite, onToggleFavorite }: RecipeCardProps) => {
   const navigate = useNavigate();
   const closeRef = useRef<HTMLButtonElement>(null);
+  const [exportLoading, setExportLoading] = useState<string | null>(null);
+
+  const primaryImage = recipe.images && (recipe.images.find((img) => img.isPrimary) || recipe.images[0]);
+  const imageUrl = primaryImage ? `http://localhost:8080/api/images/${primaryImage.id}/image` : null;
+
 
   const handleCardClick = () => {
     navigate(`/recipes/${recipe.id}`);
@@ -41,6 +47,29 @@ const RecipeCard = ({ recipe, onDelete, onSelect, onUnselect, isFavorite, onTogg
 
   const handleEditIconClick = () => {
     navigate(`recipes/edit/${recipe.id}`);
+  };
+
+  const handlePhotoUploadSuccess = () => {
+    window.location.reload();
+  };
+
+  const handleExport = (format: 'json' | 'markdown') => {
+    if (!recipe.id) return;
+
+    setExportLoading(format);
+
+    let endpoint = '';
+    if (format === 'json') {
+      endpoint = `http://localhost:8080/api/recipes/export/${recipe.id}/json`;
+    } else {
+      endpoint = `http://localhost:8080/api/recipes/export/${recipe.id}/markdown/zip`;
+    }
+
+    window.open(endpoint, '_blank');
+
+    setTimeout(() => {
+      setExportLoading(null);
+    }, 1000);
   };
 
   const handleDeleteConfirmation = async (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -120,15 +149,10 @@ const RecipeCard = ({ recipe, onDelete, onSelect, onUnselect, isFavorite, onTogg
             </HStack>
           </Box>
 
-          {/* eslint-disable-next-line no-constant-binary-expression */}
-          {(recipe.image || true) && ( // placeholder for now TODO: remove
+          {imageUrl && (
             <Box flex='1' height={{ base: '100px', md: '140px' }} maxW={{ md: '300px' }}>
               <img
-                // src={
-                //   recipe.image ||
-                //   'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=1000&auto=format&fit=crop'
-                // }
-                src={recipe.image}
+                src={imageUrl}
                 alt={recipe.name}
                 style={{
                   objectFit: 'cover',
@@ -141,15 +165,20 @@ const RecipeCard = ({ recipe, onDelete, onSelect, onUnselect, isFavorite, onTogg
             </Box>
           )}
           <Separator size={'md'} orientation={'vertical'} marginLeft={3} marginRight={3} alignSelf={'stretch'} />
-          <VStack alignSelf={'stretch'}>
+          <VStack alignSelf={'stretch'} gap={2}>
             <IconButton
               onClick={(e) => {
                 e.stopPropagation();
                 handleEditIconClick();
               }}
-              size={'xs'}>
+              size={'sm'}
+              width='32px'
+              height='32px'
+              aria-label='Edit recipe'>
               <FaEdit />
             </IconButton>
+
+            <AddPhotoModal recipeId={recipe.id ?? ''} recipeName={recipe.name} onSuccess={handlePhotoUploadSuccess} />
 
             <Dialog.Root>
               <Dialog.Trigger asChild>
@@ -157,7 +186,10 @@ const RecipeCard = ({ recipe, onDelete, onSelect, onUnselect, isFavorite, onTogg
                   onClick={(e) => {
                     e.stopPropagation();
                   }}
-                  size={'xs'}>
+                  size={'sm'}
+                  width='32px'
+                  height='32px'
+                  aria-label='Delete recipe'>
                   <MdDeleteForever />
                 </IconButton>
               </Dialog.Trigger>
@@ -199,6 +231,44 @@ const RecipeCard = ({ recipe, onDelete, onSelect, onUnselect, isFavorite, onTogg
               }}>
               {isFavorite ? <FaStar color='gold' /> : <FaRegStar />}
             </IconButton>
+            
+            <Menu.Root>
+              <Menu.Trigger asChild>
+                <IconButton
+                  onClick={(e) => {
+                    e.stopPropagation();
+                  }}
+                  size={'sm'}
+                  width='32px'
+                  height='32px'
+                  aria-label='Export recipe'
+                  loading={exportLoading !== null}>
+                  <FaFileExport />
+                </IconButton>
+              </Menu.Trigger>
+              <Portal>
+                <Menu.Positioner>
+                  <Menu.Content minWidth='160px'>
+                    <Menu.Item
+                      value='json'
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleExport('json');
+                      }}>
+                      Export as JSON
+                    </Menu.Item>
+                    <Menu.Item
+                      value='markdown'
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleExport('markdown');
+                      }}>
+                      Export as Markdown
+                    </Menu.Item>
+                  </Menu.Content>
+                </Menu.Positioner>
+              </Portal>
+            </Menu.Root>
             <Checkbox.Root
               size={'md'}
               colorPalette='yellow'
