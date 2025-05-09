@@ -14,12 +14,13 @@ import {
   CloseButton,
   Portal,
   Checkbox,
+  Menu,
 } from '@chakra-ui/react';
 import { Recipe } from '../../../types/Recipe';
-import { FaEdit } from 'react-icons/fa';
+import { FaEdit, FaFileExport } from 'react-icons/fa';
 import { MdDeleteForever } from 'react-icons/md';
 import { toaster } from '@/components/ui/toaster';
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import AddPhotoModal from './AddPhotoModal';
 
 interface RecipeCardProps {
@@ -32,9 +33,11 @@ interface RecipeCardProps {
 const RecipeCard = ({ recipe, onDelete, onSelect, onUnselect }: RecipeCardProps) => {
   const navigate = useNavigate();
   const closeRef = useRef<HTMLButtonElement>(null);
+  const [exportLoading, setExportLoading] = useState<string | null>(null);
 
   const primaryImage = recipe.images && (recipe.images.find((img) => img.isPrimary) || recipe.images[0]);
   const imageUrl = primaryImage ? `http://localhost:8080/api/images/${primaryImage.id}/image` : null;
+
 
   const handleCardClick = () => {
     navigate(`/recipes/${recipe.id}`);
@@ -46,6 +49,25 @@ const RecipeCard = ({ recipe, onDelete, onSelect, onUnselect }: RecipeCardProps)
 
   const handlePhotoUploadSuccess = () => {
     window.location.reload();
+  };
+
+  const handleExport = (format: 'json' | 'markdown') => {
+    if (!recipe.id) return;
+
+    setExportLoading(format);
+
+    let endpoint = '';
+    if (format === 'json') {
+      endpoint = `http://localhost:8080/api/recipes/export/${recipe.id}/json`;
+    } else {
+      endpoint = `http://localhost:8080/api/recipes/export/${recipe.id}/markdown/zip`;
+    }
+
+    window.open(endpoint, '_blank');
+
+    setTimeout(() => {
+      setExportLoading(null);
+    }, 1000);
   };
 
   const handleDeleteConfirmation = async (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -197,6 +219,45 @@ const RecipeCard = ({ recipe, onDelete, onSelect, onUnselect }: RecipeCardProps)
                 </Dialog.Positioner>
               </Portal>
             </Dialog.Root>
+
+            <Menu.Root>
+              <Menu.Trigger asChild>
+                <IconButton
+                  onClick={(e) => {
+                    e.stopPropagation();
+                  }}
+                  size={'sm'}
+                  width='32px'
+                  height='32px'
+                  aria-label='Export recipe'
+                  loading={exportLoading !== null}>
+                  <FaFileExport />
+                </IconButton>
+              </Menu.Trigger>
+              <Portal>
+                <Menu.Positioner>
+                  <Menu.Content minWidth='160px'>
+                    <Menu.Item
+                      value='json'
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleExport('json');
+                      }}>
+                      Export as JSON
+                    </Menu.Item>
+                    <Menu.Item
+                      value='markdown'
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleExport('markdown');
+                      }}>
+                      Export as Markdown
+                    </Menu.Item>
+                  </Menu.Content>
+                </Menu.Positioner>
+              </Portal>
+            </Menu.Root>
+
             <Checkbox.Root
               size={'md'}
               colorPalette='yellow'
