@@ -11,8 +11,8 @@ import { PaginationProvider } from './hooks/PaginationContext';
 function App(): JSX.Element {
   return (
     <>
-      <Navbar />
       <PaginationProvider>
+        <Navbar />
         <Routes>
           <Route path='/' element={<RecipeList />} />
           <Route path='/recipes' element={<RecipeList />} />
