@@ -21,6 +21,7 @@ import { FaEdit, FaStar, FaRegStar, FaFileExport } from 'react-icons/fa';
 import { MdDeleteForever } from 'react-icons/md';
 import { toaster } from '@/components/ui/toaster';
 import { useRef, useState } from 'react';
+import { usePaginationContext } from '@/hooks/PaginationContext';
 import AddPhotoModal from './AddPhotoModal';
 
 interface RecipeCardProps {
@@ -35,6 +36,7 @@ interface RecipeCardProps {
 const RecipeCard = ({ recipe, onDelete, onSelect, onUnselect, isFavorite, onToggleFavorite }: RecipeCardProps) => {
   const navigate = useNavigate();
   const closeRef = useRef<HTMLButtonElement>(null);
+  const { setScrollY } = usePaginationContext();
   const [exportLoading, setExportLoading] = useState<string | null>(null);
 
   const primaryImage = recipe.images && (recipe.images.find((img) => img.isPrimary) || recipe.images[0]);
@@ -43,10 +45,12 @@ const RecipeCard = ({ recipe, onDelete, onSelect, onUnselect, isFavorite, onTogg
 
   const handleCardClick = () => {
     navigate(`/recipes/${recipe.id}`);
+    setScrollY(window.scrollY);
   };
 
   const handleEditIconClick = () => {
     navigate(`recipes/edit/${recipe.id}`);
+    setScrollY(window.scrollY);
   };
 
   const handlePhotoUploadSuccess = () => {

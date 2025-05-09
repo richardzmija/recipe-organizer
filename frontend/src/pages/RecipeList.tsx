@@ -4,6 +4,7 @@ import { Recipe } from '../types/Recipe';
 import FilterControls from '../components/recipe/list/FilterControls';
 import RecipeCard from '../components/recipe/list/RecipeCard';
 import PaginationControls from '../components/recipe/list/PaginationControls';
+import { usePaginationContext } from '@/hooks/PaginationContext';
 
 interface PaginatedResponse {
   content: Recipe[];
@@ -29,12 +30,7 @@ export default function RecipeList() {
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [pagination, setPagination] = useState({
-    size: 10,
-    number: 0,
-    totalElements: 0,
-    totalPages: 0,
-  });
+  const { pagination, setPagination, scrollY } = usePaginationContext();
 
   const [favoriteIds, setFavoriteIds] = useState<string[]>(() => {
     const stored = localStorage.getItem(FAVORITES_KEY);
@@ -58,7 +54,17 @@ export default function RecipeList() {
   const [newIngredient, setNewIngredient] = useState('');
 
   useEffect(() => {
-    fetchRecipes();
+    window.scroll({
+      top: scrollY,
+    });
+    setFilterParams({
+      ...filterParams,
+      page: pagination.number,
+    });
+  }, []);
+
+  useEffect(() => {
+    fetchRecipes(pagination.number);
   }, [filterParams]);
 
   const handleRecipeSelect = (id: string) => {
@@ -89,10 +95,10 @@ export default function RecipeList() {
           }
         });
 
-        url += `&page=${filterParams.page}&size=${filterParams.size}`;
+        url += `&page=${page}&size=${filterParams.size}`;
         url += `&sort=${filterParams.sort}&direction=${filterParams.direction}`;
       } else {
-        url = `http://localhost:8080/api/recipes?page=${filterParams.page}&size=${filterParams.size}`;
+        url = `http://localhost:8080/api/recipes?page=${page}&size=${filterParams.size}`;
         url += `&sort=${filterParams.sort}&direction=${filterParams.direction}`;
       }
 
@@ -108,6 +114,9 @@ export default function RecipeList() {
       }
 
       const data: PaginatedResponse = await response.json();
+      window.scroll({
+        top: scrollY,
+      });
       setRecipes(data.content);
       setPagination(data.page);
     } catch (err) {
@@ -118,6 +127,10 @@ export default function RecipeList() {
   };
 
   const handlePageChange = (newPage: number) => {
+    setPagination({
+      ...pagination,
+      number: newPage,
+    });
     setFilterParams({
       ...filterParams,
       page: newPage,
