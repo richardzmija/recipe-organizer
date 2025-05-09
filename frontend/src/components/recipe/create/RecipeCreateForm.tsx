@@ -152,7 +152,7 @@ const RecipeCreateForm: FC<Props> = (props: Props) => {
 
         <Text fontWeight='bold'>Description</Text>
         <TextEditor value={description} onChange={setDescription} height='150px' />
-
+        
         <TagInput tags={tags} onChange={setTags} />
 
         <Text fontWeight='bold'>Ingredients</Text>

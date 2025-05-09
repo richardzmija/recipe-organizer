@@ -17,7 +17,7 @@ import {
   Menu,
 } from '@chakra-ui/react';
 import { Recipe } from '../../../types/Recipe';
-import { FaEdit, FaFileExport } from 'react-icons/fa';
+import { FaEdit, FaStar, FaRegStar, FaFileExport } from 'react-icons/fa';
 import { MdDeleteForever } from 'react-icons/md';
 import { toaster } from '@/components/ui/toaster';
 import { useRef, useState } from 'react';
@@ -29,9 +29,11 @@ interface RecipeCardProps {
   onDelete: () => void;
   onSelect: () => void;
   onUnselect: () => void;
+  isFavorite: boolean;
+  onToggleFavorite: () => void;
 }
 
-const RecipeCard = ({ recipe, onDelete, onSelect, onUnselect }: RecipeCardProps) => {
+const RecipeCard = ({ recipe, onDelete, onSelect, onUnselect, isFavorite, onToggleFavorite }: RecipeCardProps) => {
   const navigate = useNavigate();
   const closeRef = useRef<HTMLButtonElement>(null);
   const { setScrollY } = usePaginationContext();
@@ -223,7 +225,17 @@ const RecipeCard = ({ recipe, onDelete, onSelect, onUnselect }: RecipeCardProps)
                 </Dialog.Positioner>
               </Portal>
             </Dialog.Root>
-
+            <IconButton
+              size='xs'
+              variant='ghost'
+              aria-label='Toggle favorite'
+              onClick={(e) => {
+                e.stopPropagation();
+                onToggleFavorite();
+              }}>
+              {isFavorite ? <FaStar color='gold' /> : <FaRegStar />}
+            </IconButton>
+            
             <Menu.Root>
               <Menu.Trigger asChild>
                 <IconButton
@@ -261,7 +273,6 @@ const RecipeCard = ({ recipe, onDelete, onSelect, onUnselect }: RecipeCardProps)
                 </Menu.Positioner>
               </Portal>
             </Menu.Root>
-
             <Checkbox.Root
               size={'md'}
               colorPalette='yellow'

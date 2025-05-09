@@ -289,6 +289,7 @@ public class RecipeDataSeeder {
             return "Other";
         }
     }
+
     // Method to add images to a recipe using GridFsTemplate directly
     private Set<String> addImagesToRecipe(String recipeId) {
         Set<String> imageIds = new HashSet<>();

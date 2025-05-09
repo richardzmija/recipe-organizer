@@ -281,8 +281,10 @@ const TagManagementModal = ({ isOpen, onClose, selectedTags, onTagsChange }: Tag
         <Dialog.Content ref={modalRef} maxW='80%' maxH='90vh' w='800px'>
           <Dialog.CloseTrigger />
           <Dialog.Header>
-            <Dialog.Title>Tag Management</Dialog.Title>
-            <Dialog.Description>Add, edit, or remove tags and add them to your recipe</Dialog.Description>
+            <HStack>
+              <Dialog.Title>Tag Management</Dialog.Title>
+              <Dialog.Description>Add, edit, or remove tags and add them to your recipe</Dialog.Description>
+            </HStack>
           </Dialog.Header>
 
           <Dialog.Body>
