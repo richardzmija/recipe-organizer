@@ -20,6 +20,7 @@ import { FaEdit } from 'react-icons/fa';
 import { MdDeleteForever } from 'react-icons/md';
 import { toaster } from '@/components/ui/toaster';
 import { useRef } from 'react';
+import { usePaginationContext } from '@/hooks/PaginationContext';
 
 interface RecipeCardProps {
   recipe: Recipe;
@@ -31,13 +32,16 @@ interface RecipeCardProps {
 const RecipeCard = ({ recipe, onDelete, onSelect, onUnselect }: RecipeCardProps) => {
   const navigate = useNavigate();
   const closeRef = useRef<HTMLButtonElement>(null);
+  const { setScrollY } = usePaginationContext();
 
   const handleCardClick = () => {
     navigate(`/recipes/${recipe.id}`);
+    setScrollY(window.scrollY);
   };
 
   const handleEditIconClick = () => {
     navigate(`recipes/edit/${recipe.id}`);
+    setScrollY(window.scrollY);
   };
 
   const handleDeleteConfirmation = async (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -85,9 +89,9 @@ const RecipeCard = ({ recipe, onDelete, onSelect, onUnselect }: RecipeCardProps)
 
             {recipe.tags && recipe.tags.length > 0 && (
               <HStack gap={2} mb={4}>
-                {recipe.tags.map((tag, index) => (
-                  <Badge key={index} colorPalette='orange' variant='subtle' shadow='sm'>
-                    {tag}
+                {recipe.tags.map((tag) => (
+                  <Badge key={tag.id} variant='subtle' shadow='sm' style={{ backgroundColor: tag.color }}>
+                    {tag.name}
                   </Badge>
                 ))}
               </HStack>
@@ -121,10 +125,11 @@ const RecipeCard = ({ recipe, onDelete, onSelect, onUnselect }: RecipeCardProps)
           {(recipe.image || true) && ( // placeholder for now TODO: remove
             <Box flex='1' height={{ base: '100px', md: '140px' }} maxW={{ md: '300px' }}>
               <img
-                src={
-                  recipe.image ||
-                  'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=1000&auto=format&fit=crop'
-                }
+                // src={
+                //   recipe.image ||
+                //   'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=1000&auto=format&fit=crop'
+                // }
+                src={recipe.image}
                 alt={recipe.name}
                 style={{
                   objectFit: 'cover',

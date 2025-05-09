@@ -1,5 +1,6 @@
 package edu.agh.recipe.recipes.dto;
 
+import edu.agh.recipe.images.dto.ImageDTO;
 import edu.agh.recipe.recipes.model.Recipe;
 import edu.agh.recipe.tags.dto.TagDTO;
 import jakarta.validation.Valid;
@@ -30,16 +31,19 @@ public record RecipeDTO(
     @NotEmpty(message = "Recipe must have at least one step.")
     List<@Valid RecipeStepDTO> steps,
 
-    Set<TagDTO> tags
+    Set<TagDTO> tags,
+
+    Set<ImageDTO> images
 ) {
-    public static RecipeDTO fromEntity(Recipe recipe, List<TagDTO> tags) {
+    public static RecipeDTO fromEntity(Recipe recipe, List<TagDTO> tags, List<ImageDTO> images) {
         return new RecipeDTO(
             recipe.getId(),
             recipe.getName(),
             recipe.getDescription(),
             recipe.getIngredients().stream().map(RecipeIngredientResponseDTO::fromEntity).toList(),
             recipe.getSteps().stream().map(RecipeStepDTO::fromEntity).toList(),
-            new HashSet<>(tags)
+            new HashSet<>(tags),
+            new HashSet<>(images)
         );
     }
 }
