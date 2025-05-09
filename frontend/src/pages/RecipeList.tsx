@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Container, VStack, Spinner, Alert, Text, Box, Flex } from '@chakra-ui/react';
+import { Container, VStack, Spinner, Alert, Text, Box, Flex, Checkbox } from '@chakra-ui/react';
 import { Recipe } from '../types/Recipe';
 import FilterControls from '../components/recipe/list/FilterControls';
 import RecipeCard from '../components/recipe/list/RecipeCard';
@@ -25,11 +25,23 @@ interface FilterParams {
 }
 
 export default function RecipeList() {
+  const FAVORITES_KEY = 'favoriteRecipeIds';
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const { pagination, setPagination, scrollY } = usePaginationContext();
+
+  const [favoriteIds, setFavoriteIds] = useState<string[]>(() => {
+    const stored = localStorage.getItem(FAVORITES_KEY);
+    return stored ? (JSON.parse(stored) as string[]) : [];
+  });
+
+  const [showOnlyFavorites, setShowOnlyFavorites] = useState(false);
+
+  useEffect(() => {
+    localStorage.setItem(FAVORITES_KEY, JSON.stringify(favoriteIds));
+  }, [favoriteIds]);
 
   const [filterParams, setFilterParams] = useState<FilterParams>({
     page: 0,
@@ -61,6 +73,10 @@ export default function RecipeList() {
 
   const handleRecipeUnselect = (id: string) => {
     setSelectedIds((prev) => prev.filter((r) => r !== id));
+  };
+
+  const handleToggleFavorite = (id: string) => {
+    setFavoriteIds((prev) => (prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]));
   };
 
   const fetchRecipes = async (page: number) => {
@@ -192,6 +208,8 @@ export default function RecipeList() {
     </Box>
   );
 
+  const visibleRecipes = showOnlyFavorites ? recipes.filter((r) => r.id && favoriteIds.includes(r.id)) : recipes;
+
   return (
     <Container maxW='container.xl' py={5}>
       <VStack align='stretch'>
@@ -206,7 +224,18 @@ export default function RecipeList() {
           selectedIds={selectedIds}
           deleteRecipe={handleOnRecipeDelete}
         />
-
+        <Box alignSelf='flex-end' mb={3}>
+          <Checkbox.Root
+            checked={showOnlyFavorites}
+            onCheckedChange={(e) => setShowOnlyFavorites(!!e.checked)}
+            size='md'
+            variant='subtle'
+            className='cursor-pointer'>
+            <Checkbox.HiddenInput />
+            <Checkbox.Control />
+            <Checkbox.Label>Show only favorites</Checkbox.Label>
+          </Checkbox.Root>
+        </Box>
         {loading && <Spinner size='md' alignSelf='center' my={4} />}
 
         {!loading && (
@@ -225,11 +254,11 @@ export default function RecipeList() {
           </Flex>
         )}
 
-        {!loading && recipes.length === 0 ? (
+        {!loading && visibleRecipes.length === 0 ? (
           renderEmptyState()
         ) : (
           <VStack align='stretch'>
-            {recipes.map((recipe) => (
+            {visibleRecipes.map((recipe) => (
               <RecipeCard
                 key={recipe.id}
                 recipe={recipe}
@@ -241,6 +270,10 @@ export default function RecipeList() {
                 }}
                 onUnselect={() => {
                   if (recipe.id) handleRecipeUnselect(recipe.id);
+                }}
+                isFavorite={favoriteIds.includes(recipe.id ?? '')}
+                onToggleFavorite={() => {
+                  if (recipe.id) handleToggleFavorite(recipe.id);
                 }}
               />
             ))}
