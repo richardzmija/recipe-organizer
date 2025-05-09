@@ -170,6 +170,16 @@ const RecipeCard = ({ recipe, onDelete, onSelect, onUnselect, isFavorite, onTogg
           <Separator size={'md'} orientation={'vertical'} marginLeft={3} marginRight={3} alignSelf={'stretch'} />
           <VStack alignSelf={'stretch'} gap={2}>
             <IconButton
+              size='xs'
+              variant='ghost'
+              aria-label='Toggle favorite'
+              onClick={(e) => {
+                e.stopPropagation();
+                onToggleFavorite();
+              }}>
+              {isFavorite ? <FaStar color='gold' /> : <FaRegStar />}
+            </IconButton>
+            <IconButton
               onClick={(e) => {
                 e.stopPropagation();
                 handleEditIconClick();
@@ -224,16 +234,6 @@ const RecipeCard = ({ recipe, onDelete, onSelect, onUnselect, isFavorite, onTogg
                 </Dialog.Positioner>
               </Portal>
             </Dialog.Root>
-            <IconButton
-              size='xs'
-              variant='ghost'
-              aria-label='Toggle favorite'
-              onClick={(e) => {
-                e.stopPropagation();
-                onToggleFavorite();
-              }}>
-              {isFavorite ? <FaStar color='gold' /> : <FaRegStar />}
-            </IconButton>
 
             <Menu.Root>
               <Menu.Trigger asChild>

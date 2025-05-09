@@ -4,20 +4,20 @@ import { ColorModeButton, useColorModeValue } from './color-mode';
 import Header from '../common/Header';
 import ImportRecipeForm from '@/components/recipe/import/ImportRecipeForm';
 import { useRef } from 'react';
-import { usePaginationContext } from '@/hooks/PaginationContext';
 
-export default function Navbar() {
+interface Props {
+  onRefresh: () => void;
+}
+
+export default function Navbar({ onRefresh }: Props) {
   const bgColor = useColorModeValue('gray.200', 'gray.800');
   const closeRef = useRef<HTMLButtonElement | null>(null);
-  const { pagination, setPagination } = usePaginationContext();
 
   const handleOnSuccess = () => {
     if (!closeRef || !closeRef.current) return;
     closeRef.current.click();
     // refresh
-    setPagination({
-      ...pagination,
-    });
+    onRefresh();
   };
 
   return (

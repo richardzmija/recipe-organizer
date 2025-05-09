@@ -7,15 +7,17 @@ import { Toaster } from '@/components/ui/toaster';
 import RecipeDetails from './pages/RecipeDetails';
 import EditRecipePage from './pages/EditRecipePage';
 import { PaginationProvider } from './hooks/PaginationContext';
+import { useState } from 'react';
 
 function App(): JSX.Element {
+  const [refreshSignal, setRefreshSignal] = useState(0);
   return (
     <>
       <PaginationProvider>
-        <Navbar />
+        <Navbar onRefresh={() => setRefreshSignal((prev) => prev + 1)} />
         <Routes>
-          <Route path='/' element={<RecipeList />} />
-          <Route path='/recipes' element={<RecipeList />} />
+          <Route path='/' element={<RecipeList refreshSignal={refreshSignal} />} />
+          <Route path='/recipes' element={<RecipeList refreshSignal={refreshSignal} />} />
           <Route path='/recipes/create' element={<AddRecipePage />} />
           <Route path='/recipes/:id' element={<RecipeDetails />} />
           <Route path='/recipes/edit/:id' element={<EditRecipePage />} />

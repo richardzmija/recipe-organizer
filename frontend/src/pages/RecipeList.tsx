@@ -6,6 +6,10 @@ import RecipeCard from '../components/recipe/list/RecipeCard';
 import PaginationControls from '../components/recipe/list/PaginationControls';
 import { usePaginationContext } from '@/hooks/PaginationContext';
 
+interface Props {
+  refreshSignal: number;
+}
+
 interface PaginatedResponse {
   content: Recipe[];
   page: {
@@ -24,7 +28,7 @@ interface FilterParams {
   ingredients: string[];
 }
 
-export default function RecipeList() {
+export default function RecipeList({ refreshSignal }: Props) {
   const FAVORITES_KEY = 'favoriteRecipeIds';
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
@@ -65,7 +69,7 @@ export default function RecipeList() {
 
   useEffect(() => {
     fetchRecipes(pagination.number);
-  }, [filterParams]);
+  }, [filterParams, refreshSignal]);
 
   const handleRecipeSelect = (id: string) => {
     setSelectedIds((prev) => [...prev, id]);
