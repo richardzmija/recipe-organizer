@@ -10,9 +10,23 @@ interface StepsViewerProps {
 export default function StepsViewer({ steps }: StepsViewerProps) {
   const [currentStep, setCurrentStep] = useState(0);
   const [viewMode, setViewMode] = useState<'navigator' | 'list'>('list');
+  const [isTransitioning, setIsTransitioning] = useState(false);
 
-  const goPrev = () => setCurrentStep((s) => Math.max(s - 1, 0));
-  const goNext = () => setCurrentStep((s) => Math.min(s + 1, steps.length - 1));
+  const goPrev = () => {
+    setIsTransitioning(true);
+    setTimeout(() => {
+      setCurrentStep((s) => Math.max(s - 1, 0));
+      setIsTransitioning(false);
+    }, 150);
+  };
+
+  const goNext = () => {
+    setIsTransitioning(true);
+    setTimeout(() => {
+      setCurrentStep((s) => Math.min(s + 1, steps.length - 1));
+      setIsTransitioning(false);
+    }, 150);
+  };
 
   const toggleViewMode = () => {
     setViewMode(viewMode === 'navigator' ? 'list' : 'navigator');
@@ -64,7 +78,15 @@ export default function StepsViewer({ steps }: StepsViewerProps) {
           <FaChevronLeft />
         </Button>
 
-        <Card.Root variant='outline' mb={4} width='50%' shadow='xl' size='sm'>
+        <Card.Root
+          variant='outline'
+          mb={4}
+          width='50%'
+          shadow='xl'
+          size='sm'
+          transition='all 0.3s ease-in-out'
+          opacity={isTransitioning ? 0.3 : 1}
+          transform={isTransitioning ? 'scale(0.95)' : 'scale(1)'}>
           <Card.Header>
             <Heading
               as='p'
