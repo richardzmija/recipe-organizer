@@ -32,78 +32,75 @@ export default function StepsViewer({ steps }: StepsViewerProps) {
     setViewMode(viewMode === 'navigator' ? 'list' : 'navigator');
   };
 
-  if (viewMode === 'list') {
-    return (
-      <Box>
-        <Flex justify='space-between' align='center' mb={4}>
-          <Heading as='h3' size='lg'>
-            All Steps
-          </Heading>
-          <Button onClick={toggleViewMode} variant='outline'>
-            <FaStepForward style={{ marginRight: '8px' }} />
-            Step Navigator
-          </Button>
-        </Flex>
-
-        <VStack align='stretch' gap={4}>
-          {steps.map((step, index) => (
-            <Card.Root key={index} variant='outline' shadow='md'>
-              <Card.Header>
-                <Heading as='h4' size='md' dangerouslySetInnerHTML={{ __html: step.title }} />
-              </Card.Header>
-              <Card.Body>
-                <Text dangerouslySetInnerHTML={{ __html: step.text }} />
-              </Card.Body>
-            </Card.Root>
-          ))}
-        </VStack>
-      </Box>
-    );
-  }
-
   return (
     <Box>
-      <Flex justify='space-between' align='center' mb={4}>
-        <Text textAlign='left' fontSize='sm' color='gray.500'>
-          Step {currentStep + 1} of {steps.length}
-        </Text>
-        <Button onClick={toggleViewMode} variant='outline'>
-          <FaList style={{ marginRight: '8px' }} />
-          View All Steps
+      <Flex justify='center' mb={6}>
+        <Button onClick={toggleViewMode} colorScheme='blue' size='lg'>
+          {viewMode === 'navigator' ? (
+            <FaList style={{ marginRight: '8px' }} />
+          ) : (
+            <FaStepForward style={{ marginRight: '8px' }} />
+          )}
+          {viewMode === 'navigator' ? 'View All Steps' : 'Step Navigator'}
         </Button>
       </Flex>
 
-      <Flex align='center' justify='center' gap={4}>
-        <Button onClick={goPrev} visibility={currentStep === 0 ? 'hidden' : 'visible'}>
-          <FaChevronLeft />
-        </Button>
+      {viewMode === 'list' ? (
+        <Box>
+          <VStack align='stretch' gap={4}>
+            {steps.map((step, index) => (
+              <Card.Root key={index} variant='outline' shadow='md'>
+                <Card.Header>
+                  <Heading as='h4' size='md' dangerouslySetInnerHTML={{ __html: step.title }} />
+                </Card.Header>
+                <Card.Body>
+                  <Text dangerouslySetInnerHTML={{ __html: step.text }} />
+                </Card.Body>
+              </Card.Root>
+            ))}
+          </VStack>
+        </Box>
+      ) : (
+        <Box>
+          <Flex justify='center' align='center' mb={4}>
+            <Text textAlign='center' fontSize='lg' color='gray.600' fontWeight='medium'>
+              Step {currentStep + 1} of {steps.length}
+            </Text>
+          </Flex>
 
-        <Card.Root
-          variant='outline'
-          mb={4}
-          width='50%'
-          shadow='xl'
-          size='sm'
-          transition='all 0.3s ease-in-out'
-          opacity={isTransitioning ? 0.3 : 1}
-          transform={isTransitioning ? 'scale(0.95)' : 'scale(1)'}>
-          <Card.Header>
-            <Heading
-              as='p'
-              size='xl'
-              textAlign='center'
-              dangerouslySetInnerHTML={{ __html: steps[currentStep].title }}
-            />
-          </Card.Header>
-          <Card.Body>
-            <Text dangerouslySetInnerHTML={{ __html: steps[currentStep].text }} />
-          </Card.Body>
-        </Card.Root>
+          <Flex align='center' justify='center' gap={4}>
+            <Button onClick={goPrev} visibility={currentStep === 0 ? 'hidden' : 'visible'} size='lg'>
+              <FaChevronLeft />
+            </Button>
 
-        <Button onClick={goNext} visibility={currentStep === steps.length - 1 ? 'hidden' : 'visible'}>
-          <FaChevronRight />
-        </Button>
-      </Flex>
+            <Card.Root
+              variant='outline'
+              mb={4}
+              width='50%'
+              shadow='xl'
+              size='sm'
+              transition='all 0.3s ease-in-out'
+              opacity={isTransitioning ? 0.3 : 1}
+              transform={isTransitioning ? 'scale(0.95)' : 'scale(1)'}>
+              <Card.Header>
+                <Heading
+                  as='p'
+                  size='xl'
+                  textAlign='center'
+                  dangerouslySetInnerHTML={{ __html: steps[currentStep].title }}
+                />
+              </Card.Header>
+              <Card.Body>
+                <Text dangerouslySetInnerHTML={{ __html: steps[currentStep].text }} />
+              </Card.Body>
+            </Card.Root>
+
+            <Button onClick={goNext} visibility={currentStep === steps.length - 1 ? 'hidden' : 'visible'} size='lg'>
+              <FaChevronRight />
+            </Button>
+          </Flex>
+        </Box>
+      )}
     </Box>
   );
 }
