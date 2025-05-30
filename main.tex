@@ -1,0 +1,202 @@
+\documentclass[12pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{geometry}
+\geometry{a4paper, margin=1in}
+
+\setlength{\parindent}{0pt}
+
+\title{\textbf{Roboty}}
+\author{Igor Sikora, Łukasz Wilański, Michał Ramut, Jakub Ciszewski}
+\date{Maj 2025}
+
+\begin{document}
+
+\maketitle
+
+\section{Wstęp}
+
+\subsection{Cel}
+Celem projektu jest stworzenie modelu matematycznego opisującego problem oraz użycie go przy tworzeniu algorytmu genetycznego.
+
+\section{Opis zagadnienia}
+
+\subsection{Sformułowanie problemu}
+Opisywanym problemem jest pewna wariacja \textbf{MTSP}, czyli \textbf{Multi Travelling Salesman Problem}. 
+\\\\
+W naszym przypadku komiwojażerami jest zbiór homogenicznych robotów $R=\{r_1,r_2,...,r_n\}$ z maksymalnym udźwigiem $u$. Natomiast miastami, które roboty muszą odwiedzić, jest zbiór ludzi uwięzionych w labiryncie $L=\{l_1,l_2,...,l_k\}$ o wagach $W=\{w_1,w_2,...,w_k\}$.
+\\\\
+Każdy robot ma za zadanie wystartować ze swojego punktu startowego $s_i$ zebrać możliwie jak najwięcej osób tak, żeby nie przekroczyć swojego maksymalnego udźwigu $u$ oraz w jak najkrótszym czasie wrócić do punktu początkowego. Wszystkie roboty \textbf{muszą} uratować wszystkich ludzi.
+
+\subsection{Model matematyczny}
+
+Jako wejście dostajemy dwuwymiarową tablicę, po której będą poruszały się roboty.
+
+\vspace{2mm}
+
+W tablicy wyróżniamy 4 rodzaje pól:
+\begin{enumerate}
+    \item \textbf{pozycja startowa} - pole z którego roboty zaczynają akcję ratowniczą i do którego muszą wrócić
+    \item \textbf{przeszkoda} - pole na które robot nie może wejść
+    \item \textbf{człowiek} - pole które jakiś robot musi odwiedzić podczas akcji ratowniczej
+    \item \textbf{pole puste} - pole przez które robot może swobodnie przejść
+\end{enumerate}
+
+Każdy robot posiada limit udźwigu i suma wag ludzi, których robot bierze na pokład, nie może przekroczyć tego limitu.
+
+\subsubsection{Osobnik populacji – potencjalny kandydat na rozwiązanie}
+
+Pojedynczy osobnik w populacji reprezentuje jedno możliwe rozwiązanie problemu przydziału robotów do zadań ratunkowych. Zakładamy, że w gruzowisku znajduje się \( k \) osób oznaczonych numerami od \( 0 \) do \( k-1 \), a do dyspozycji mamy \( n \) robotów. Każdy robot rozpoczyna i kończy swoją trasę na polu startowym \( S \) i nie może przekroczyć dopuszczalnego limitu udźwigu.
+
+\vspace{2mm}
+
+Osobnik jest reprezentowany jako:
+\begin{itemize}
+    \item \textbf{permutacja} zbioru osób \(\{0, 1, \dots, k-1\}\), która określa kolejność odwiedzin wszystkich poszkodowanych,
+    \item \textbf{podział tej permutacji na \( 1 \) do \( n \) segmentów}, gdzie każdy segment przypisany jest do jednego robota,
+    \item każda ścieżka zaczyna się i kończy w punkcie \( S \) – oznacza to, że każdy robot wraca po zakończonej akcji na miejsce startu.
+\end{itemize}
+
+Dla przykładu, przy \( k = 7 \) osobach i \( n = 3 \) robotach, możliwy osobnik może wyglądać następująco:
+\[
+\{S, 5, 3, S\}, \quad \{S, 0, 4, 1, S\}, \quad \{S, 6, 2, S\}
+\]
+
+Taki osobnik oznacza, że:
+\begin{itemize}
+    \item pierwszy robot odwiedza osoby 5 i 3,
+    \item drugi – osoby 0, 4 i 1,
+    \item trzeci – osoby 6 i 2.
+\end{itemize}
+
+Wszystkie osoby są obsłużone, a każda trasa zaczyna i kończy się na polu startowym \( S \). Długość tras oraz łączny ciężar transportowanych osób przez każdego robota będą brane pod uwagę w funkcji oceny (fitness). W trakcie inicjalizacji populacji i operacji genetycznych zapewnia się, że każdy osobnik spełnia ograniczenia problemu.
+
+\subsubsection{Funkcja kosztu}
+
+Koszt rozwiązania reprezentowanego przez pojedynczego osobnika odpowiada całkowitemu kosztowi przeprowadzenia akcji ratunkowej przez wszystkie roboty. Koszt trasy pojedynczego robota definiowany jest jako suma najkrótszych ścieżek między kolejnymi punktami, które robot musi odwiedzić – począwszy od pola startowego \( S \), przez przypisanych mu ludzi, aż do powrotu na \( S \).
+
+Zakładamy, że dostępna jest funkcja \texttt{min\_path}(i, j), która zwraca koszt najkrótszej ścieżki między osobą \( i \) a osobą \( j \), gdzie \( i, j \in \{0, \dots, k-1\} \cup \{S\} \). Na potrzeby obliczeń pozycję startową również traktujemy jako specjalny wierzchołek oznaczony \( S \).
+
+Dla przykładowej trasy robota:
+\[
+\{S, 5, 3, 2, S\}
+\]
+koszt trasy wynosi:
+\[
+\texttt{min\_path}(S, 5) + \texttt{min\_path}(5, 3) + \texttt{min\_path}(3, 2) + \texttt{min\_path}(2, S)
+\]
+
+Całkowity koszt osobnika, reprezentującego pełne rozwiązanie, to suma kosztów tras wszystkich robotów:
+\[
+\text{Koszt całkowity} = \sum_{i=1}^{m} \text{koszt\_trasy}(r_i)
+\]
+gdzie \( r_i \) to trasa przypisana robotowi \( i \), a \( m \) to liczba tras (czyli liczba wykorzystanych robotów w danym osobniku).
+
+
+\section{Opis algorytmu}
+Jako algorytm dla tego problemu wybrano algorytm \textbf{genetyczny}.
+
+\subsection{Idea algorytmu}
+Ideą naszego algorytmu \textbf{genetycznego} jest stworzenie losowych osobników populacji reprezentowanych jako mapy $r_i \rightarrow (l_i,l_j,...,l_w)$, gdzie $r_i$ to robot, a $(l_i,l_j,...,l_w)$ to ludzie, których ratuje w podanej kolejności.
+
+Dokonujemy \textbf{selekcji} - odrzucamy wszystkich osobników, którzy nie spełniają naszego zadania, np. nie ratują wszystkich ludzi lub biorą więcej ludzi, niż mogą udźwignąć.
+
+Następnie osobników \textbf{krzyżujemy} między sobą, czyli na podstawie dwóch osobników tworzymy nowego osobnika, posiadającego cechy dwóch rodziców. 
+
+Na samym końcu \textbf{mutujemy} osobników, czyli wprowadzamy niewielkie losowe zmiany w genach niektórych osobników.
+
+Takie jedno przejście \textbf{selekcja} $\rightarrow$ \textbf{krzyżowanie} $\rightarrow$ \textbf{mutacja} tworzy nową populację. Takich populacji tworzymy wiele, a na samym końcu wybieramy najlepszych osobników z populacji końcowej.
+
+\subsection{Adaptacja}
+
+\subsubsection{Reprezentacja rozwiązania}
+Rozwiązanie reprezentowane jest jako odwzorowanie
+\[\forall r \in R: \; r \rightarrow (l_i,l_j,...,l_w)\]
+gdzie:
+\begin{itemize}
+    \item $r$ - robot
+    \item $(l_i,l_j,...,l_w)$ - ciąg ludzi ratowanych przez robota
+\end{itemize}
+
+\subsubsection{Wygenerowanie populacji początkowej}
+Generowanie populacji początkowej jest stosunkowo proste. Tworzymy $n$ losowo wygenerowanych osobników, przy tym sprawdzając, czy wylosowany osobnik spełnia warunki zadania, czyli np. czy wszyscy ludzie zostali uratowani lub czy żaden robot nie wziął na siebie za dużego ciężaru.
+
+\subsubsection{Krzyżowanie}
+\begin{itemize}
+    \item \textbf{Podstawowy osobnik} - z dwóch osobników losowo wybieramy geny jednego z nich
+    
+    \item \textbf{Osobnik z częściowym krzyżowaniem} - z dwóch osobników wybieramy połowę robotów jednego z osobników, a pozostałe rozlosowujemy pomiędzy pozostałe roboty
+
+    \item \textbf{Osobnik "minmax"} - tak jak podstawowy osobnik
+    
+    \item \textbf{Osobnik z maksymalizowaniem zysku} - tak jak podstawowy osobnik
+
+    \item \textbf{Osobnik z minimalizowaniem kosztu} - tak jak osobnik z częściowym krzyżowaniem
+    
+    \item \textbf{Osobnik z częściowym krzyżowaniem z minimalizowaniem kosztu} - tak jak osobnik z częściowym krzyżowaniem
+    
+    \item \textbf{Osobnik z częściowym krzyżowaniem z maksymalizowaniem zysku} - tak jak osobnik z częściowym krzyżowaniem
+    
+    \item \textbf{Osobnik "minmax" z częściowym krzyżowaniem} - tak jak osobnik z częściowym krzyżowaniem
+
+\end{itemize}
+
+\subsubsection{Mutacja}
+
+\begin{itemize}
+    \item \textbf{Podstawowy osobnik} - losowo przekładamy człowieka z robota $r_i$ do robota $r_j$
+
+    \item \textbf{Osobnik z częściowym krzyżowaniem} - tak jak podstawowy osobnik
+
+    \item \textbf{Osobnik z maksymalizowaniem zysku} - iteracyjnie szukamy takiej mutacji, w której dla danego robota dokładamy człowieka do uratowania i jednocześnie jak najmniej zwiększamy tym koszt.
+
+    \item \textbf{Osobnik z minimalizowaniem kosztu} - iteracyjnie szukamy takiej mutacji, w której dla danego robota zabieramy człowieka, który najbardziej zwiększa koszt
+
+    \item \textbf{Osobnik "minmax"} - kombinacja mutacji osobnika z minimalizacją kosztu i osobnika z maksymalizacją zysku
+
+     \item \textbf{Osobnik z częściowym krzyżowaniem z minimalizowaniem kosztu} - tak jak osobnik z minimalizowaniem kosztu
+    
+    \item \textbf{Osobnik z częściowym krzyżowaniem z maksymalizowaniem zysku} - tak jak osobnik z maksymalizacją zysku
+    
+    \item \textbf{Osobnik "minmax" z częściowym krzyżowaniem} - tak jak osobnik "minmax"
+
+    
+\end{itemize}
+
+
+% \subsubsection{Operator krzyżowania}
+
+% Proces krzyżowania osobników ma na celu stworzenie nowego rozwiązania (potomka) poprzez dziedziczenie cech od dwóch rodziców. W każdej generacji wyodrębniamy \(\frac{1}{4}\) najlepszych osobników z populacji (elitarnych), kierując się minimalnym kosztem akcji ratunkowej. 
+
+% \vspace{2mm}
+
+% Krzyżowanie odbywa się wyłącznie w tej grupie, aby zwiększyć szansę dziedziczenia korzystnych cech.
+
+% \vspace{2mm}
+
+% Potomek dziedziczy dwie główne cechy:
+% \begin{enumerate}
+%     \item \textbf{Liczba tras (podziałów permutacji)} – jeśli rodzice mają odpowiednio \( m_1 \) i \( m_2 \) tras, to potomek otrzymuje:
+%     \[
+%     m_3 = \left\lfloor \frac{m_1 + m_2}{2} \right\rfloor
+%     \]
+%     Dzięki temu zapewniamy umiarkowane zróżnicowanie i kontrolę nad liczbą użytych robotów.
+
+%     \item \textbf{Struktura permutacji (kolejność odwiedzin)} – celem jest zachowanie najlepszych cech permutacji rodziców. W tym celu analizujemy przejścia między punktami w trasach rodziców i identyfikujemy te, które występują często lub mają niski koszt (według funkcji \texttt{min\_path}). Wybrane przejścia są następnie umieszczane w permutacji potomka, przy zachowaniu poprawności (tj. bez powtórzeń osób). Pozostałe elementy są dopełniane losowo lub na podstawie jednej z permutacji rodziców.
+% \end{enumerate}
+
+% Problematyczne może być natomiast zadbanie o to żeby żadna trasa w potomku nie przekroczyła limitu udźwigu. 
+
+% \vspace{2mm}
+
+% Inne potencjalne operatory krzyżowania, które są często używane w przypadku permutacji to
+% \begin{itemize}
+%         \item \textbf{Order Crossover (OX)}
+%         \item \textbf{Partially Mapped Crossover (PMX)}
+%         \item \textbf{Edge Recombination Crossover (ERX)}
+%     \end{itemize}
+
+
+\end{document}

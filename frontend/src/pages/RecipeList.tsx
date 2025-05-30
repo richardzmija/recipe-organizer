@@ -91,7 +91,7 @@ export default function RecipeList({ refreshSignal, onRefresh }: Props) {
       let url = '';
 
       if (filterParams.ingredients.length > 0) {
-        url = 'http://localhost:8080/api/recipes/filter?';
+        url = 'http://localhost:8080/api/recipes/filter/all?';
 
         filterParams.ingredients.forEach((ingredient, index) => {
           url += `ingredients=${encodeURIComponent(ingredient)}`;
