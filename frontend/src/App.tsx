@@ -18,7 +18,6 @@ function App(): JSX.Element {
         <Navbar onRefresh={onRefresh} />
         <Routes>
           <Route path='/' element={<RecipeList refreshSignal={refreshSignal} onRefresh={onRefresh} />} />
-          <Route path='/recipes' element={<RecipeList refreshSignal={refreshSignal} onRefresh={onRefresh} />} />
           <Route path='/recipes/create' element={<AddRecipePage />} />
           <Route path='/recipes/:id' element={<RecipeDetails />} />
           <Route path='/recipes/edit/:id' element={<EditRecipePage />} />

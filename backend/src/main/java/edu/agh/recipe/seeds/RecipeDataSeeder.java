@@ -46,7 +46,6 @@ public class RecipeDataSeeder {
             "#FF5733", "#33FF57", "#3357FF", "#F033FF", "#FF33A6",
             "#33FFF0", "#FFF033", "#FF8333", "#33FFD4", "#D433FF"
     );
-
     // Food images stored in resources folder for recipe seeding
     // Random images will be selected from this list and attached to each recipe
     private final List<String> sampleImagePaths = Arrays.asList(
@@ -291,7 +290,6 @@ public class RecipeDataSeeder {
             return "Other";
         }
     }
-    
 
     // Method to add images to a recipe using GridFsTemplate directly
     private Set<String> addImagesToRecipe(String recipeId) {
@@ -334,7 +332,6 @@ public class RecipeDataSeeder {
         
         return imageIds;
     }
-    
     @Bean
     public CommandLineRunner seedDatabaseWithRecipes(RecipeRepository recipeRepository) {
         return args -> {

@@ -5,7 +5,6 @@ import FilterControls from '../components/recipe/list/FilterControls';
 import RecipeCard from '../components/recipe/list/RecipeCard';
 import PaginationControls from '../components/recipe/list/PaginationControls';
 import { usePaginationContext } from '@/hooks/PaginationContext';
-
 interface Props {
   refreshSignal: number;
   onRefresh: () => void;

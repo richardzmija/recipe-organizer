@@ -7,7 +7,6 @@ import { ImageCarousel } from './ImageCarousel';
 interface RecipeContentProps {
   recipe: Recipe;
 }
-
 export const RecipeContent = ({ recipe: initialRecipe }: RecipeContentProps) => {
   const [recipe, setRecipe] = useState(initialRecipe);
   const [, setRefreshKey] = useState(0);

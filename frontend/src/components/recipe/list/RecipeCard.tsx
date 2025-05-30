@@ -244,7 +244,17 @@ const RecipeCard = ({
                 </Dialog.Positioner>
               </Portal>
             </Dialog.Root>
-
+            <IconButton
+              size='xs'
+              variant='ghost'
+              aria-label='Toggle favorite'
+              onClick={(e) => {
+                e.stopPropagation();
+                onToggleFavorite();
+              }}>
+              {isFavorite ? <FaStar color='gold' /> : <FaRegStar />}
+            </IconButton>
+            
             <Menu.Root>
               <Menu.Trigger asChild>
                 <IconButton
@@ -282,7 +292,6 @@ const RecipeCard = ({
                 </Menu.Positioner>
               </Portal>
             </Menu.Root>
-
             <Checkbox.Root
               size={'md'}
               colorPalette='yellow'
