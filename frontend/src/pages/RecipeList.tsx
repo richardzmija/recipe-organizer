@@ -5,6 +5,10 @@ import FilterControls from '../components/recipe/list/FilterControls';
 import RecipeCard from '../components/recipe/list/RecipeCard';
 import PaginationControls from '../components/recipe/list/PaginationControls';
 import { usePaginationContext } from '@/hooks/PaginationContext';
+interface Props {
+  refreshSignal: number;
+  onRefresh: () => void;
+}
 
 interface PaginatedResponse {
   content: Recipe[];
@@ -24,7 +28,7 @@ interface FilterParams {
   ingredients: string[];
 }
 
-export default function RecipeList() {
+export default function RecipeList({ refreshSignal, onRefresh }: Props) {
   const FAVORITES_KEY = 'favoriteRecipeIds';
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
@@ -65,7 +69,7 @@ export default function RecipeList() {
 
   useEffect(() => {
     fetchRecipes(pagination.number);
-  }, [filterParams]);
+  }, [filterParams, refreshSignal]);
 
   const handleRecipeSelect = (id: string) => {
     setSelectedIds((prev) => [...prev, id]);
@@ -86,7 +90,7 @@ export default function RecipeList() {
       let url = '';
 
       if (filterParams.ingredients.length > 0) {
-        url = 'http://localhost:8080/api/recipes/filter?';
+        url = 'http://localhost:8080/api/recipes/filter/all?';
 
         filterParams.ingredients.forEach((ingredient, index) => {
           url += `ingredients=${encodeURIComponent(ingredient)}`;
@@ -275,6 +279,7 @@ export default function RecipeList() {
                 onToggleFavorite={() => {
                   if (recipe.id) handleToggleFavorite(recipe.id);
                 }}
+                onPhotoUploadSuccess={onRefresh}
               />
             ))}
           </VStack>
