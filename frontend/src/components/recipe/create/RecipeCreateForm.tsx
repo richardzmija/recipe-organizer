@@ -44,6 +44,15 @@ const RecipeCreateForm: FC<Props> = (props: Props) => {
       return;
     }
 
+    if (ingredients.some((ingredient) => ingredient.quantity <= 0)) {
+      toaster.create({
+        title: 'Error',
+        description: 'Ingredient quantity has to be greater than 0.',
+        type: 'error',
+      });
+      return;
+    }
+
     const tagReferences = tags.map((tag) => ({
       id: tag.id,
     }));
@@ -152,7 +161,7 @@ const RecipeCreateForm: FC<Props> = (props: Props) => {
 
         <Text fontWeight='bold'>Description</Text>
         <TextEditor value={description} onChange={setDescription} height='150px' />
-        
+
         <TagInput tags={tags} onChange={setTags} />
 
         <Text fontWeight='bold'>Ingredients</Text>
