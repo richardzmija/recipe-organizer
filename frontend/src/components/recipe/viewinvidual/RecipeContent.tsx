@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { VStack, Heading, Text, List, Flex, HStack, Badge, Separator, Box, Card } from '@chakra-ui/react';
-import StepNavigator from './StepNavigator';
+import StepsViewer from './StepsViewer';
 import { Recipe } from '../../../types/Recipe';
 import { ImageCarousel } from './ImageCarousel';
 
@@ -77,7 +77,7 @@ export const RecipeContent = ({ recipe: initialRecipe }: RecipeContentProps) => 
       <Heading as='h2' size='xl'>
         Steps
       </Heading>
-      <StepNavigator steps={recipe.steps} />
+      <StepsViewer steps={recipe.steps} />
     </VStack>
   );
 };
