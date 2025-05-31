@@ -17,7 +17,7 @@ import {
   Menu,
 } from '@chakra-ui/react';
 import { Recipe } from '../../../types/Recipe';
-import { FaEdit, FaStar, FaRegStar, FaFileExport } from 'react-icons/fa';
+import { FaEdit, FaFileExport, FaStar, FaRegStar } from 'react-icons/fa';
 import { MdDeleteForever } from 'react-icons/md';
 import { toaster } from '@/components/ui/toaster';
 import { useRef, useState } from 'react';
@@ -31,9 +31,18 @@ interface RecipeCardProps {
   onUnselect: () => void;
   isFavorite: boolean;
   onToggleFavorite: () => void;
+  onPhotoUploadSuccess: () => void;
 }
 
-const RecipeCard = ({ recipe, onDelete, onSelect, onUnselect, isFavorite, onToggleFavorite }: RecipeCardProps) => {
+const RecipeCard = ({
+  recipe,
+  onDelete,
+  onSelect,
+  onUnselect,
+  isFavorite,
+  onToggleFavorite,
+  onPhotoUploadSuccess,
+}: RecipeCardProps) => {
   const navigate = useNavigate();
   const closeRef = useRef<HTMLButtonElement>(null);
   const { setScrollY } = usePaginationContext();
@@ -41,7 +50,6 @@ const RecipeCard = ({ recipe, onDelete, onSelect, onUnselect, isFavorite, onTogg
 
   const primaryImage = recipe.images && (recipe.images.find((img) => img.isPrimary) || recipe.images[0]);
   const imageUrl = primaryImage ? `http://localhost:8080/api/images/${primaryImage.id}/image` : null;
-
 
   const handleCardClick = () => {
     navigate(`/recipes/${recipe.id}`);
@@ -54,7 +62,8 @@ const RecipeCard = ({ recipe, onDelete, onSelect, onUnselect, isFavorite, onTogg
   };
 
   const handlePhotoUploadSuccess = () => {
-    window.location.reload();
+    setScrollY(window.scrollY);
+    onPhotoUploadSuccess();
   };
 
   const handleExport = (format: 'json' | 'markdown') => {
@@ -170,6 +179,16 @@ const RecipeCard = ({ recipe, onDelete, onSelect, onUnselect, isFavorite, onTogg
           )}
           <Separator size={'md'} orientation={'vertical'} marginLeft={3} marginRight={3} alignSelf={'stretch'} />
           <VStack alignSelf={'stretch'} gap={2}>
+            <IconButton
+              size='xs'
+              variant='ghost'
+              aria-label='Toggle favorite'
+              onClick={(e) => {
+                e.stopPropagation();
+                onToggleFavorite();
+              }}>
+              {isFavorite ? <FaStar color='gold' /> : <FaRegStar />}
+            </IconButton>
             <IconButton
               onClick={(e) => {
                 e.stopPropagation();

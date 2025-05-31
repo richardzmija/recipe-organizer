@@ -9,6 +9,7 @@ import edu.agh.recipe.recipes.repository.RecipeRepository;
 import edu.agh.recipe.tags.model.Tag;
 import edu.agh.recipe.tags.repository.TagRepository;
 import edu.agh.recipe.units.domain.MeasurementUnit;
+import edu.agh.recipe.units.domain.Quantity;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

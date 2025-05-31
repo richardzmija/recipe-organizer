@@ -65,7 +65,8 @@ export const RecipeContent = ({ recipe: initialRecipe }: RecipeContentProps) => 
             <List.Root>
               {recipe.ingredients.map((ingredient, index) => (
                 <List.Item key={index}>
-                  {ingredient.ingredientName} {ingredient.quantity} {ingredient.unit.toLowerCase()}
+                  {/* idk if we can do something like this, but I know that it may be hard to parse units while webscraping so for now its ok */}
+                  {ingredient.ingredientName} {ingredient.quantity} {ingredient.unit?.toLowerCase() || ''}
                 </List.Item>
               ))}
             </List.Root>
@@ -76,7 +77,6 @@ export const RecipeContent = ({ recipe: initialRecipe }: RecipeContentProps) => 
       <Heading as='h2' size='xl'>
         Steps
       </Heading>
-
       <StepNavigator steps={recipe.steps} />
     </VStack>
   );
