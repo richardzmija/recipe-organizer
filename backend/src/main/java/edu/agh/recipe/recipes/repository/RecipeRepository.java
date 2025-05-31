@@ -45,4 +45,10 @@ public interface RecipeRepository extends MongoRepository<Recipe, String> {
     @Query("{ 'tagIds': { $all: ?0 } }")
     Page<Recipe> findByTagIdsAll(List<String> tagIds, Pageable pageable);
 
+    @Query("{ $and: [ " +
+           "?#{ [0] == null ? { $expr: true } : { 'name': { $regex: [0], $options: 'i' } } }, " +
+           "?#{ [1] == null ? { $expr: true } : { 'ingredients.ingredientName': { $all: [1] } } }, " +
+           "?#{ [2] == null ? { $expr: true } : { 'tagIds': { $all: [2] } } } " +
+           "] }")
+    Page<Recipe> advancedSearch(String name, List<String> ingredients, List<String> tagIds, Pageable pageable);
 }
