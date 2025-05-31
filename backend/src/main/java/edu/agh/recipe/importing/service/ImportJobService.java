@@ -24,9 +24,9 @@ public class ImportJobService {
     public void startImportJobAsync(RecipeImportRequest request, String jobId) {
         ImportJobStatus jobStatus = jobs.get(jobId);
         try {
-            Recipe recipe = recipeImportService.importRecipe(request.url());
+            RecipeImportPreviewDTO recipe = recipeImportService.importRecipe(request.url());
             jobStatus.setStatus("COMPLETED");
-            jobStatus.setResult(RecipeImportPreviewDTO.fromEntity(recipe));
+            jobStatus.setResult(recipe);
         } catch (IllegalArgumentException e) {
             jobStatus.setStatus("FAILED");
             jobStatus.setErrorMessage("Unsupported source URL: " + e.getMessage());
