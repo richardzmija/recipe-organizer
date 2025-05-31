@@ -79,7 +79,7 @@ export default function RecipeList() {
     setFavoriteIds((prev) => (prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]));
   };
 
-  const fetchRecipes = async () => {
+  const fetchRecipes = async (page: number) => {
     try {
       setLoading(true);
 
