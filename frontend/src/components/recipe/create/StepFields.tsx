@@ -9,6 +9,8 @@ interface Props {
   onChange: (steps: Step[]) => void;
 }
 
+const editorHeight = '100px';
+
 const StepFields = ({ steps, onChange }: Props) => {
   // Generate stable random keys for each step - fixes weird behavior
   const stepKeys = useMemo(() => {
@@ -38,6 +40,7 @@ const StepFields = ({ steps, onChange }: Props) => {
               value={step.title || `Step ${i + 1}`}
               onChange={(val) => handleChange(i, 'title', val)}
               placeholder='Step name'
+              height={editorHeight}
             />
           </Box>
 
@@ -46,6 +49,7 @@ const StepFields = ({ steps, onChange }: Props) => {
               value={step.text}
               onChange={(val) => handleChange(i, 'text', val)}
               placeholder='Step description'
+              height={editorHeight}
             />
           </Box>
 
@@ -54,7 +58,7 @@ const StepFields = ({ steps, onChange }: Props) => {
             variant='outline'
             onClick={() => handleRemove(i)}
             alignSelf='start'
-            minH='77px'>
+            height={editorHeight}>
             <LuTrash2 />
           </IconButton>
         </HStack>
