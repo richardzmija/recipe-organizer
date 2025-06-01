@@ -14,14 +14,12 @@ import edu.agh.recipe.tags.service.TagService;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
-import org.springframework.data.domain.Pageable;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -221,6 +219,33 @@ public class DefaultRecipeService implements RecipeService {
         });
     }
 
+    @Override
+    public Page<RecipeDTO> advancedSearch(String name, List<String> ingredients, List<String> tagIds,
+                                         String sortField, String direction, Pageable pageable) {
+        // Process the name parameter for partial matching.
+        String namePattern = name != null ? ".*" + name + ".*" : null;
+
+        // Convert ingredient names to lowercase for case-insensitive matching.
+        List<String> lowerCaseIngredients = ingredients != null ?
+                ingredients.stream().map(String::toLowerCase).toList() : null;
+
+        Sort sort = createSort(sortField, direction);
+
+
+        Pageable sortedPageable = PageRequest.of(
+                pageable.getPageNumber(),
+                pageable.getPageSize(),
+                sort);
+
+        Page<Recipe> recipePage = recipeRepository.advancedSearch(namePattern, lowerCaseIngredients, tagIds, sortedPageable);
+
+        return recipePage.map(recipe -> {
+            List<TagDTO> tags = tagService.getTagsByIds(new ArrayList<>(recipe.getTagIds()));
+            List<ImageDTO> images = imageService.getImagesDataByIds(new ArrayList<>(recipe.getImageIds()));
+            return RecipeDTO.fromEntity(recipe, tags, images);
+        });
+    }
+
     public RecipeDTO addTagsToRecipe(String recipeId, Set<TagReferenceDTO> tagReferences) {
         Recipe recipe = recipeRepository.findById(recipeId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Recipe not found."));
@@ -394,7 +419,7 @@ public class DefaultRecipeService implements RecipeService {
         Recipe savedRecipe = recipeRepository.save(recipe);
 
         if (imageDTOs.stream().noneMatch(ImageDTO::isPrimary) && !existingImageIds.isEmpty()) {
-            return setImageAsPrimary(recipeId, imageIds.get(0));
+            return setImageAsPrimary(recipeId, imageIds.getFirst());
         }
 
         List<TagDTO> tags = tagService.getTagsByIds(new ArrayList<>(savedRecipe.getTagIds()));
@@ -464,5 +489,30 @@ public class DefaultRecipeService implements RecipeService {
         }
     }
 
+    private Sort createSort(String sortField, String direction) {
+        // Set default values if not provided.
+        if (sortField == null) sortField = "name";
+        if (direction == null) direction = "asc";
+
+        switch (sortField) {
+            case "name":
+                // Only name is currently implemented in the database.
+                break;
+            case "created_date":
+            case "modification_date":
+            case "last_access_date":
+                // These fields will be implemented later.
+                // For now, default to sorting by name.
+                sortField = "name";
+                break;
+            default:
+                sortField = "name";
+        }
+
+        Sort.Direction sortDirection = direction.equalsIgnoreCase("desc") ?
+                Sort.Direction.DESC : Sort.Direction.ASC;
+
+        return Sort.by(sortDirection, sortField);
+    }
 
 }
