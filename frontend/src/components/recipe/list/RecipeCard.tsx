@@ -23,6 +23,7 @@ import { toaster } from '@/components/ui/toaster';
 import { useRef, useState } from 'react';
 import { usePaginationContext } from '@/hooks/PaginationContext';
 import AddPhotoModal from './AddPhotoModal';
+import { FAVORITES_TAG_ID, FAVORITES_TAG_NAME } from '@/config/tags';
 
 interface RecipeCardProps {
   recipe: Recipe;
@@ -130,11 +131,13 @@ const RecipeCard = ({
 
             {recipe.tags && recipe.tags.length > 0 && (
               <HStack gap={2} mb={4}>
-                {recipe.tags.map((tag) => (
-                  <Badge key={tag.id} variant='subtle' shadow='sm' style={{ backgroundColor: tag.color }}>
-                    {tag.name}
-                  </Badge>
-                ))}
+                {recipe.tags
+                  .filter((tag) => tag.id !== FAVORITES_TAG_ID && tag.name !== FAVORITES_TAG_NAME)
+                  .map((tag) => (
+                    <Badge key={tag.id} variant='subtle' shadow='sm' style={{ backgroundColor: tag.color }}>
+                      {tag.name}
+                    </Badge>
+                  ))}
               </HStack>
             )}
 
@@ -244,17 +247,6 @@ const RecipeCard = ({
                 </Dialog.Positioner>
               </Portal>
             </Dialog.Root>
-            <IconButton
-              size='xs'
-              variant='ghost'
-              aria-label='Toggle favorite'
-              onClick={(e) => {
-                e.stopPropagation();
-                onToggleFavorite();
-              }}>
-              {isFavorite ? <FaStar color='gold' /> : <FaRegStar />}
-            </IconButton>
-            
             <Menu.Root>
               <Menu.Trigger asChild>
                 <IconButton

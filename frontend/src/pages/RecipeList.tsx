@@ -5,6 +5,9 @@ import FilterControls from '../components/recipe/list/FilterControls';
 import RecipeCard from '../components/recipe/list/RecipeCard';
 import PaginationControls from '../components/recipe/list/PaginationControls';
 import { usePaginationContext } from '@/hooks/PaginationContext';
+import { toaster } from '@/components/ui/toaster';
+import { FAVORITES_TAG_ID, FAVORITES_TAG_NAME } from '@/config/tags';
+
 interface Props {
   refreshSignal: number;
   onRefresh: () => void;
@@ -29,23 +32,13 @@ interface FilterParams {
 }
 
 export default function RecipeList({ refreshSignal, onRefresh }: Props) {
-  const FAVORITES_KEY = 'favoriteRecipeIds';
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const { pagination, setPagination, scrollY } = usePaginationContext();
 
-  const [favoriteIds, setFavoriteIds] = useState<string[]>(() => {
-    const stored = localStorage.getItem(FAVORITES_KEY);
-    return stored ? (JSON.parse(stored) as string[]) : [];
-  });
-
   const [showOnlyFavorites, setShowOnlyFavorites] = useState(false);
-
-  useEffect(() => {
-    localStorage.setItem(FAVORITES_KEY, JSON.stringify(favoriteIds));
-  }, [favoriteIds]);
 
   const [filterParams, setFilterParams] = useState<FilterParams>({
     page: 0,
@@ -54,7 +47,6 @@ export default function RecipeList({ refreshSignal, onRefresh }: Props) {
     direction: 'asc',
     ingredients: [],
   });
-
   const [newIngredient, setNewIngredient] = useState('');
 
   useEffect(() => {
@@ -69,7 +61,7 @@ export default function RecipeList({ refreshSignal, onRefresh }: Props) {
 
   useEffect(() => {
     fetchRecipes(pagination.number);
-  }, [filterParams, refreshSignal]);
+  }, [filterParams, refreshSignal, showOnlyFavorites]);
 
   const handleRecipeSelect = (id: string) => {
     setSelectedIds((prev) => [...prev, id]);
@@ -79,8 +71,63 @@ export default function RecipeList({ refreshSignal, onRefresh }: Props) {
     setSelectedIds((prev) => prev.filter((r) => r !== id));
   };
 
-  const handleToggleFavorite = (id: string) => {
-    setFavoriteIds((prev) => (prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]));
+  const handleToggleFavorite = async (recipeId: string, isFav: boolean) => {
+    const current = recipes.find((r) => r.id === recipeId);
+    if (!current) return;
+
+    const favTag = {
+      id: FAVORITES_TAG_ID,
+      name: FAVORITES_TAG_NAME,
+      existingTag: true,
+    };
+
+    const requestInit: RequestInit = isFav
+      ? {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify([favTag]),
+        }
+      : {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify([favTag]),
+        };
+
+    try {
+      const res = await fetch(`http://localhost:8080/api/recipes/${recipeId}/tags`, requestInit);
+
+      if (res.ok) {
+        const updated: Recipe = await res.json();
+        setRecipes((prev) => prev.map((r) => (r.id === updated.id ? updated : r)));
+
+        if (showOnlyFavorites) {
+          setRecipes((prev) => prev.filter((r) => r.tags?.some((t) => t.id === FAVORITES_TAG_ID)));
+        }
+
+        toaster.create({
+          title: 'Success',
+          description: isFav ? 'Removed from favourites' : 'Added to favourites',
+          type: 'success',
+        });
+      } else {
+        const message =
+          (await res.json().catch(() => undefined))?.message ||
+          (await res.text().catch(() => '')) ||
+          'Failed to update favourites';
+
+        toaster.create({
+          title: 'Error',
+          description: message,
+          type: 'error',
+        });
+      }
+    } catch (err) {
+      toaster.create({
+        title: 'Error',
+        description: err instanceof Error ? err.message : 'An unexpected error occurred',
+        type: 'error',
+      });
+    }
   };
 
   const fetchRecipes = async (page: number) => {
@@ -99,6 +146,10 @@ export default function RecipeList({ refreshSignal, onRefresh }: Props) {
           }
         });
 
+        url += `&page=${page}&size=${filterParams.size}`;
+        url += `&sort=${filterParams.sort}&direction=${filterParams.direction}`;
+      } else if (showOnlyFavorites) {
+        url = `http://localhost:8080/api/recipes/filter/tag/by-id?tagId=${FAVORITES_TAG_ID}`;
         url += `&page=${page}&size=${filterParams.size}`;
         url += `&sort=${filterParams.sort}&direction=${filterParams.direction}`;
       } else {
@@ -212,8 +263,6 @@ export default function RecipeList({ refreshSignal, onRefresh }: Props) {
     </Box>
   );
 
-  const visibleRecipes = showOnlyFavorites ? recipes.filter((r) => r.id && favoriteIds.includes(r.id)) : recipes;
-
   return (
     <Container maxW='container.xl' py={5}>
       <VStack align='stretch'>
@@ -258,30 +307,32 @@ export default function RecipeList({ refreshSignal, onRefresh }: Props) {
           </Flex>
         )}
 
-        {!loading && visibleRecipes.length === 0 ? (
+        {!loading && recipes.length === 0 ? (
           renderEmptyState()
         ) : (
           <VStack align='stretch'>
-            {visibleRecipes.map((recipe) => (
-              <RecipeCard
-                key={recipe.id}
-                recipe={recipe}
-                onDelete={() => {
-                  if (recipe.id) handleOnRecipeDelete(recipe.id);
-                }}
-                onSelect={() => {
-                  if (recipe.id) handleRecipeSelect(recipe.id);
-                }}
-                onUnselect={() => {
-                  if (recipe.id) handleRecipeUnselect(recipe.id);
-                }}
-                isFavorite={favoriteIds.includes(recipe.id ?? '')}
-                onToggleFavorite={() => {
-                  if (recipe.id) handleToggleFavorite(recipe.id);
-                }}
-                onPhotoUploadSuccess={onRefresh}
-              />
-            ))}
+            {recipes.map((recipe) => {
+              const isFav = recipe.tags?.some((t) => t.id === FAVORITES_TAG_ID);
+
+              return (
+                <RecipeCard
+                  key={recipe.id}
+                  recipe={recipe}
+                  onDelete={() => {
+                    if (recipe.id) handleOnRecipeDelete(recipe.id);
+                  }}
+                  onSelect={() => {
+                    if (recipe.id) handleRecipeSelect(recipe.id);
+                  }}
+                  onUnselect={() => {
+                    if (recipe.id) handleRecipeUnselect(recipe.id);
+                  }}
+                  isFavorite={isFav}
+                  onToggleFavorite={() => recipe.id && handleToggleFavorite(recipe.id, isFav)}
+                  onPhotoUploadSuccess={onRefresh}
+                />
+              );
+            })}
           </VStack>
         )}
 
