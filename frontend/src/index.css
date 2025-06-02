@@ -57,3 +57,7 @@
 .preview-box li {
   margin-bottom: 0.25em;
 }
+
+.chakra-badge:not(.ingredient) {
+  color: black !important;
+}
