@@ -147,7 +147,14 @@ const RecipeCard = ({
               <Box mt={3} mb={2}>
                 <HStack flexWrap='wrap' gap={2}>
                   {recipe.ingredients.map((ingredient, index) => (
-                    <Badge key={index} colorPalette='green' variant='subtle' px={2} py={1} borderRadius='full'>
+                    <Badge
+                      className='ingredient'
+                      key={index}
+                      colorPalette='green'
+                      variant='subtle'
+                      px={2}
+                      py={1}
+                      borderRadius='full'>
                       {ingredient.ingredientName}
                     </Badge>
                   ))}

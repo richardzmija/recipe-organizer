@@ -12,6 +12,7 @@ interface Props {
 export default function Navbar({ onRefresh }: Props) {
   const bgColor = useColorModeValue('gray.200', 'gray.800');
   const closeRef = useRef<HTMLButtonElement | null>(null);
+  const buttonColor = useColorModeValue('white', 'black');
 
   const handleOnSuccess = () => {
     if (!closeRef || !closeRef.current) return;
@@ -36,7 +37,9 @@ export default function Navbar({ onRefresh }: Props) {
           </Link>
           <Dialog.Root>
             <Dialog.Trigger asChild>
-              <Button colorPalette='green'>Import Recipe</Button>
+              <Button colorPalette='green' color={buttonColor}>
+                Import Recipe
+              </Button>
             </Dialog.Trigger>
             <Dialog.Backdrop />
             <Dialog.Positioner>
