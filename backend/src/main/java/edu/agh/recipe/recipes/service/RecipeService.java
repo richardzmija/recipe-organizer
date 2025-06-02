@@ -9,6 +9,8 @@ import edu.agh.recipe.tags.dto.TagReferenceDTO;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.web.multipart.MultipartFile;
+
 
 import java.util.List;
 import java.util.Set;
@@ -39,4 +41,19 @@ public interface RecipeService {
 
     // Recipe-specific tag functionality
     List<TagDTO> suggestTagsForRecipe(String recipeId, int limit);
+
+    // Recipe-image operations
+    RecipeDTO uploadImageForRecipe(String recipeId, String description, MultipartFile image);
+    RecipeDTO removeImageFromRecipe(String id, String imageId);
+    RecipeDTO setImageAsPrimary(String id, String imageId);
+    RecipeDTO linkImagesToRecipe(String recipeId, List<String> imageIds);
+
+    // Advanced search functionality
+    Page<RecipeDTO> advancedSearch(
+        String name,
+        List<String> ingredients,
+        List<String> tagIds,
+        String sortField,
+        String direction,
+        Pageable pageable);
 }

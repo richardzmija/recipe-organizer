@@ -1,47 +1,66 @@
-import { Input, IconButton, HStack, Box, Flex } from '@chakra-ui/react';
-import { LuPlus, LuX } from 'react-icons/lu';
+import { HStack, Box, Flex, Badge, Button, VStack, Text } from '@chakra-ui/react';
+import { LuX, LuSettings } from 'react-icons/lu';
 import { useState } from 'react';
+import { Tag } from '@/types/Tag';
+import TagManagementModal from './TagManagementModal';
 
 interface Props {
-  tags: string[];
-  onChange: (tags: string[]) => void;
+  tags: Tag[];
+  onChange: (tags: Tag[]) => void;
 }
 
 const TagInput = ({ tags, onChange }: Props) => {
-  const [tagInput, setTagInput] = useState('');
+  const [showTagModal, setShowTagModal] = useState(false);
 
-  const handleAdd = () => {
-    const trimmed = tagInput.trim();
-    if (trimmed && !tags.includes(trimmed)) {
-      onChange([...tags, trimmed]);
-      setTagInput('');
-    }
-  };
-
-  const handleRemove = (index: number) => {
-    const newTags = tags.filter((_, i) => i !== index);
+  const handleRemoveTag = (tagId: string) => {
+    const newTags = tags.filter((tag) => tag.id !== tagId);
     onChange(newTags);
   };
 
   return (
     <>
-      <HStack mb={2}>
-        <Input value={tagInput} onChange={(e) => setTagInput(e.target.value)} placeholder='Add tag' />
-        <IconButton aria-label='Add tag' onClick={handleAdd}>
-          <LuPlus />
-        </IconButton>
-      </HStack>
+      <VStack align='start' w='100%' gap={2}>
+        <HStack w='100%' justify='space-between'>
+          <Text fontWeight='bold'>Tags</Text>
+          <Button size='sm' onClick={() => setShowTagModal(true)}>
+            <HStack>
+              <LuSettings />
+              <Text>Manage Tags</Text>
+            </HStack>
+          </Button>
+        </HStack>
 
-      <HStack wrap='wrap' gap={2}>
-        {tags.map((tag, i) => (
-          <Flex key={i} px={2} py={1} borderRadius='md' align='center' gap={1}>
-            <Box fontWeight='bold'>{tag}</Box>
-            <IconButton aria-label={`Usuń tag ${tag}`} size='xs' variant='ghost' onClick={() => handleRemove(i)}>
-              <LuX />
-            </IconButton>
+        {tags.length === 0 ? (
+          <Text fontSize='sm'>No tags selected. Use the Manage Tags button to add tags.</Text>
+        ) : (
+          <Flex wrap='wrap' gap={2}>
+            {tags.map((tag) => (
+              <Badge
+                key={tag.id}
+                px={2}
+                py={1}
+                borderRadius='md'
+                variant='subtle'
+                shadow='sm'
+                style={{ backgroundColor: tag.color }}
+                display='flex'
+                alignItems='center'>
+                <Text>{tag.name}</Text>
+                <Box as='span' ml={1} cursor='pointer' onClick={() => handleRemoveTag(tag.id)}>
+                  <LuX size={14} />
+                </Box>
+              </Badge>
+            ))}
           </Flex>
-        ))}
-      </HStack>
+        )}
+      </VStack>
+
+      <TagManagementModal
+        isOpen={showTagModal}
+        onClose={() => setShowTagModal(false)}
+        selectedTags={tags}
+        onTagsChange={onChange}
+      />
     </>
   );
 };

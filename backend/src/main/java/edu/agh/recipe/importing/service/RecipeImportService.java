@@ -7,10 +7,12 @@ import edu.agh.recipe.importing.model.RecipeImportFieldQuery;
 import edu.agh.recipe.recipes.dto.RecipeIngredientDTO;
 import edu.agh.recipe.recipes.dto.RecipeStepDTO;
 import edu.agh.recipe.recipes.repository.RecipeRepository;
+
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -83,86 +85,4 @@ public class RecipeImportService {
             throw new RecipeImportException("Failed to import recipe from " + url, e);
         }
     }
-
-//    public RecipeImportPreviewDTO importFromMojewypieki(String url) {
-//        try {
-//            Document doc = Jsoup.connect(url).get();
-//
-//            String title = doc.select("div.title h1").text();
-//            String description = doc.select("div.article__content blockquote p em").text();
-//
-//            List<RecipeIngredientDTO> ingredients = doc.select("div.article__content ul li").stream()
-//                    .map(Element::text)
-//                    .map(text -> {
-//                        Optional<RecipeIngredientDTO> parsed = ingredientParser.parse(text);
-//                        if (parsed.isEmpty()) {
-//                            log.warn("Could not parse ingredient line: '{}'", text);
-//                        }
-//                        return parsed;
-//                    })
-//                    .flatMap(Optional::stream) // Skips cases where parse(...) returns Optional.empty().
-//                    .toList();
-//
-//            Elements stepElements = doc.select("div.article__content > p[style=\"text-align: justify;\"]");
-//
-//            List<RecipeStepDTO> steps = new ArrayList<>();
-//            for (int i = 0; i < stepElements.size(); i++) {
-//                Element step = stepElements.get(i);
-//                String text = step.text();
-//                steps.add(new RecipeStepDTO("Step " + (i + 1), text));
-//            }
-//
-//            return new RecipeImportPreviewDTO(title, description, ingredients, steps, Set.of());
-//        } catch (IOException e) {
-//            throw new RecipeImportException("Failed to import recipe from mojewypieki.com", e);
-//        }
-//    }
-
-//    public RecipeImportPreviewDTO importRecipe(String url) {
-//        if (url.contains("mojewypieki.com")) {
-//            return importFromMojewypieki(url);
-//        }
-//        // else if (url.contains("other-website.com")) {
-//        //     return importFromOtherWebsite(url);
-//        // }
-//        else {
-//            throw new IllegalArgumentException("Unsupported source URL: " + url);
-//        }
-//    }
-//
-//    public RecipeImportPreviewDTO importFromMojewypieki(String url) {
-//        try {
-//            Document doc = Jsoup.connect(url).get();
-//
-//            String title = doc.select("div.title h1").text();
-//            String description = doc.select("div.article__content blockquote p em").text();
-//
-//            List<RecipeIngredientDTO> ingredients = doc.select("div.article__content ul li").stream()
-//                    .map(Element::text)
-//                    .map(text -> {
-//                        Optional<RecipeIngredientDTO> parsed = ingredientParser.parse(text);
-//                        if (parsed.isEmpty()) {
-//                            log.warn("Could not parse ingredient line: '{}'", text);
-//                        }
-//                        return parsed;
-//                    })
-//                    .flatMap(Optional::stream) // Skips cases where parse(...) returns Optional.empty().
-//                    .toList();
-//
-//            Elements stepElements = doc.select("div.article__content > p[style=\"text-align: justify;\"]");
-//
-//            List<RecipeStepDTO> steps = new ArrayList<>();
-//            for (int i = 0; i < stepElements.size(); i++) {
-//                Element step = stepElements.get(i);
-//                String text = step.text();
-//                steps.add(new RecipeStepDTO("Step " + (i + 1), text));
-//            }
-//
-//            return new RecipeImportPreviewDTO(title, description, ingredients, steps, Set.of());
-//        } catch (IOException e) {
-//            throw new RecipeImportException("Failed to import recipe from mojewypieki.com", e);
-//        }
-//    }
-
-    // private RecipeImportPreviewDTO importFromOtherWebsite(String url) { ... }
 }

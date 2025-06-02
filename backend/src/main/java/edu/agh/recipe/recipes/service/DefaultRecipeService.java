@@ -1,5 +1,8 @@
 package edu.agh.recipe.recipes.service;
 
+import edu.agh.recipe.images.dto.ImageDTO;
+import edu.agh.recipe.images.dto.ImageMetadataDTO;
+import edu.agh.recipe.images.service.ImageService;
 import edu.agh.recipe.recipes.dto.*;
 import edu.agh.recipe.recipes.model.Recipe;
 import edu.agh.recipe.recipes.model.RecipeStep;
@@ -11,13 +14,12 @@ import edu.agh.recipe.tags.service.TagService;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
-import org.springframework.data.domain.Pageable;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -31,10 +33,12 @@ public class DefaultRecipeService implements RecipeService {
 
     private final RecipeRepository recipeRepository;
     private final TagService tagService;
+    private final ImageService imageService;
 
-    public DefaultRecipeService(RecipeRepository recipeRepository, TagService tagService) {
+    public DefaultRecipeService(RecipeRepository recipeRepository, TagService tagService, ImageService imageService) {
         this.recipeRepository = Objects.requireNonNull(recipeRepository);
         this.tagService = Objects.requireNonNull(tagService);
+        this.imageService = Objects.requireNonNull(imageService);
     }
 
     @Override
@@ -42,7 +46,8 @@ public class DefaultRecipeService implements RecipeService {
         Page<Recipe> recipePage = recipeRepository.findAll(pageable);
         return recipePage.map(recipe -> {
             List<TagDTO> tags = tagService.getTagsByIds(new ArrayList<>(recipe.getTagIds()));
-            return RecipeDTO.fromEntity(recipe, tags);
+            List<ImageDTO> images = imageService.getImagesDataByIds(new ArrayList<>(recipe.getImageIds()));
+            return RecipeDTO.fromEntity(recipe, tags, images);
         });
     }
 
@@ -52,7 +57,8 @@ public class DefaultRecipeService implements RecipeService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Recipe not found."));
 
         List<TagDTO> tags = tagService.getTagsByIds(new ArrayList<>(recipe.getTagIds()));
-        return RecipeDTO.fromEntity(recipe, tags);
+        List<ImageDTO> images = imageService.getImagesDataByIds(new ArrayList<>(recipe.getImageIds()));
+        return RecipeDTO.fromEntity(recipe, tags, images);
     }
 
     @Override
@@ -70,7 +76,8 @@ public class DefaultRecipeService implements RecipeService {
         Recipe savedRecipe = recipeRepository.save(recipe);
 
         List<TagDTO> tags = tagService.getTagsByIds(new ArrayList<>(tagIds));
-        return RecipeDTO.fromEntity(savedRecipe, tags);
+        List<ImageDTO> images = imageService.getImagesDataByIds(new ArrayList<>(recipe.getImageIds()));
+        return RecipeDTO.fromEntity(savedRecipe, tags, images);
     }
 
     @Override
@@ -100,7 +107,8 @@ public class DefaultRecipeService implements RecipeService {
         updateTagUsageCounts(oldTagIds, newTagIds);
 
         List<TagDTO> tags = tagService.getTagsByIds(new ArrayList<>(newTagIds));
-        return RecipeDTO.fromEntity(updatedRecipe, tags);
+        List<ImageDTO> images = imageService.getImagesDataByIds(new ArrayList<>(recipe.getImageIds()));
+        return RecipeDTO.fromEntity(updatedRecipe, tags, images);
     }
 
     @Override
@@ -142,7 +150,8 @@ public class DefaultRecipeService implements RecipeService {
         Page<Recipe> recipePage = recipeRepository.findByIngredientsIngredientNameIn(lowerCaseIngredients, pageable);
         return recipePage.map(recipe -> {
             List<TagDTO> tags = tagService.getTagsByIds(new ArrayList<>(recipe.getTagIds()));
-            return RecipeDTO.fromEntity(recipe, tags);
+            List<ImageDTO> images = imageService.getImagesDataByIds(new ArrayList<>(recipe.getImageIds()));
+            return RecipeDTO.fromEntity(recipe, tags, images);
         });
     }
 
@@ -154,7 +163,8 @@ public class DefaultRecipeService implements RecipeService {
         Page<Recipe> recipePage = recipeRepository.findByAllIngredientsContaining(lowerCaseIngredientNames, pageable);
         return recipePage.map(recipe -> {
             List<TagDTO> tags = tagService.getTagsByIds(new ArrayList<>(recipe.getTagIds()));
-            return RecipeDTO.fromEntity(recipe, tags);
+            List<ImageDTO> images = imageService.getImagesDataByIds(new ArrayList<>(recipe.getImageIds()));
+            return RecipeDTO.fromEntity(recipe, tags, images);
         });
     }
 
@@ -163,7 +173,8 @@ public class DefaultRecipeService implements RecipeService {
         Page<Recipe> recipePage = recipeRepository.findByNameStartingWithIgnoreCase(nameQuery, pageable);
         return recipePage.map(recipe -> {
             List<TagDTO> tags = tagService.getTagsByIds(new ArrayList<>(recipe.getTagIds()));
-            return RecipeDTO.fromEntity(recipe, tags);
+            List<ImageDTO> images = imageService.getImagesDataByIds(new ArrayList<>(recipe.getImageIds()));
+            return RecipeDTO.fromEntity(recipe, tags, images);
         });
     }
 
@@ -172,7 +183,8 @@ public class DefaultRecipeService implements RecipeService {
         Page<Recipe> recipePage = recipeRepository.findByTagIdsContaining(tagId, pageable);
         return recipePage.map(recipe -> {
             List<TagDTO> tags = tagService.getTagsByIds(new ArrayList<>(recipe.getTagIds()));
-            return RecipeDTO.fromEntity(recipe, tags);
+            List<ImageDTO> images = imageService.getImagesDataByIds(new ArrayList<>(recipe.getImageIds()));
+            return RecipeDTO.fromEntity(recipe, tags, images);
         });
     }
 
@@ -192,7 +204,8 @@ public class DefaultRecipeService implements RecipeService {
         Page<Recipe> recipePage = recipeRepository.findByTagIdsIn(tagIds, pageable);
         return recipePage.map(recipe -> {
             List<TagDTO> tags = tagService.getTagsByIds(new ArrayList<>(recipe.getTagIds()));
-            return RecipeDTO.fromEntity(recipe, tags);
+            List<ImageDTO> images = imageService.getImagesDataByIds(new ArrayList<>(recipe.getImageIds()));
+            return RecipeDTO.fromEntity(recipe, tags, images);
         });
     }
 
@@ -201,7 +214,35 @@ public class DefaultRecipeService implements RecipeService {
         Page<Recipe> recipePage = recipeRepository.findByTagIdsAll(tagIds, pageable);
         return recipePage.map(recipe -> {
             List<TagDTO> tags = tagService.getTagsByIds(new ArrayList<>(recipe.getTagIds()));
-            return RecipeDTO.fromEntity(recipe, tags);
+            List<ImageDTO> images = imageService.getImagesDataByIds(new ArrayList<>(recipe.getImageIds()));
+            return RecipeDTO.fromEntity(recipe, tags, images);
+        });
+    }
+
+    @Override
+    public Page<RecipeDTO> advancedSearch(String name, List<String> ingredients, List<String> tagIds,
+                                         String sortField, String direction, Pageable pageable) {
+        // Process the name parameter for partial matching.
+        String namePattern = name != null ? ".*" + name + ".*" : null;
+
+        // Convert ingredient names to lowercase for case-insensitive matching.
+        List<String> lowerCaseIngredients = ingredients != null ?
+                ingredients.stream().map(String::toLowerCase).toList() : null;
+
+        Sort sort = createSort(sortField, direction);
+
+
+        Pageable sortedPageable = PageRequest.of(
+                pageable.getPageNumber(),
+                pageable.getPageSize(),
+                sort);
+
+        Page<Recipe> recipePage = recipeRepository.advancedSearch(namePattern, lowerCaseIngredients, tagIds, sortedPageable);
+
+        return recipePage.map(recipe -> {
+            List<TagDTO> tags = tagService.getTagsByIds(new ArrayList<>(recipe.getTagIds()));
+            List<ImageDTO> images = imageService.getImagesDataByIds(new ArrayList<>(recipe.getImageIds()));
+            return RecipeDTO.fromEntity(recipe, tags, images);
         });
     }
 
@@ -218,7 +259,8 @@ public class DefaultRecipeService implements RecipeService {
         Recipe savedRecipe = recipeRepository.save(recipe);
 
         List<TagDTO> tags = tagService.getTagsByIds(new ArrayList<>(savedRecipe.getTagIds()));
-        return RecipeDTO.fromEntity(savedRecipe, tags);
+        List<ImageDTO> images = imageService.getImagesDataByIds(new ArrayList<>(recipe.getImageIds()));
+        return RecipeDTO.fromEntity(savedRecipe, tags, images);
     }
 
     @Override
@@ -265,7 +307,8 @@ public class DefaultRecipeService implements RecipeService {
         }
 
         List<TagDTO> tags = tagService.getTagsByIds(new ArrayList<>(recipe.getTagIds()));
-        return RecipeDTO.fromEntity(recipe, tags);
+        List<ImageDTO> images = imageService.getImagesDataByIds(new ArrayList<>(recipe.getImageIds()));
+        return RecipeDTO.fromEntity(recipe, tags, images);
     }
 
     @Override
@@ -282,6 +325,106 @@ public class DefaultRecipeService implements RecipeService {
                 .filter(tag -> !existingTagIds.contains(tag.id()))
                 .limit(limit)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public RecipeDTO uploadImageForRecipe(String recipeId, String description, MultipartFile image){
+        Recipe recipe = recipeRepository.findById(recipeId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Recipe not found."));
+
+        ImageMetadataDTO imageMetadataDTO = new ImageMetadataDTO(
+                recipeId, description, recipe.getImageIds().isEmpty(), new Date()
+        );
+
+        String imageId = imageService.uploadImage(image, imageMetadataDTO);
+
+        Set<String> imageIds = new HashSet<>(recipe.getImageIds());
+        imageIds.add(imageId);
+        recipe.setImageIds(imageIds);
+
+        Recipe savedRecipe = recipeRepository.save(recipe);
+
+        List<TagDTO> tags = tagService.getTagsByIds(new ArrayList<>(savedRecipe.getTagIds()));
+        List<ImageDTO> images = imageService.getImagesDataByIds(new ArrayList<>(recipe.getImageIds()));
+        return RecipeDTO.fromEntity(recipe, tags, images);
+    }
+
+    @Override
+    public RecipeDTO removeImageFromRecipe(String recipeId, String imageId) {
+        Recipe recipe = recipeRepository.findById(recipeId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Recipe not found."));
+
+        imageService.removeImageById(imageId);
+
+        Set<String> imageIds = new HashSet<>(recipe.getImageIds());
+        imageIds.remove(imageId);
+        recipe.setImageIds(imageIds);
+
+        Recipe savedRecipe = recipeRepository.save(recipe);
+
+        List<TagDTO> tags = tagService.getTagsByIds(new ArrayList<>(savedRecipe.getTagIds()));
+        List<ImageDTO> images = imageService.getImagesDataByIds(new ArrayList<>(recipe.getImageIds()));
+
+        if (images.stream().filter((ImageDTO::isPrimary)).toList().isEmpty()) {
+            return setImageAsPrimary(recipeId, images.getFirst().id());
+        }
+
+        return RecipeDTO.fromEntity(recipe, tags, images);
+    }
+
+    @Override
+    public RecipeDTO setImageAsPrimary(String recipeId, String imageId) {
+        Recipe recipe = recipeRepository.findById(recipeId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Recipe not found."));
+
+        List<ImageDTO> images = imageService.getImagesDataByIds(new ArrayList<>(recipe.getImageIds()));
+
+        if(images.stream().filter((ImageDTO::isPrimary)).toList().isEmpty()){
+            imageService.setImagePrimary(imageId, true);
+        }
+        else {
+            String currentPrimaryId = images.stream()
+                    .filter((ImageDTO::isPrimary))
+                    .toList()
+                    .getFirst()
+                    .id();
+
+            if(!currentPrimaryId.equals(imageId)){
+                imageService.setImagePrimary(currentPrimaryId, false);
+                imageService.setImagePrimary(imageId, true);
+            }
+        }
+
+        Recipe savedRecipe = recipeRepository.save(recipe);
+
+        List<TagDTO> tags = tagService.getTagsByIds(new ArrayList<>(savedRecipe.getTagIds()));
+        images = imageService.getImagesDataByIds(new ArrayList<>(recipe.getImageIds()));
+        return RecipeDTO.fromEntity(recipe, tags, images);
+    }
+
+    @Override
+    public RecipeDTO linkImagesToRecipe(String recipeId, List<String> imageIds) {
+        Recipe recipe = recipeRepository.findById(recipeId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Recipe not found."));
+
+        List<ImageDTO> imageDTOs = imageService.getImagesDataByIds(imageIds);
+        if (imageDTOs.size() != imageIds.size()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "One or more image IDs are invalid");
+        }
+
+        Set<String> existingImageIds = new HashSet<>(recipe.getImageIds());
+        existingImageIds.addAll(imageIds);
+        recipe.setImageIds(existingImageIds);
+
+        Recipe savedRecipe = recipeRepository.save(recipe);
+
+        if (imageDTOs.stream().noneMatch(ImageDTO::isPrimary) && !existingImageIds.isEmpty()) {
+            return setImageAsPrimary(recipeId, imageIds.getFirst());
+        }
+
+        List<TagDTO> tags = tagService.getTagsByIds(new ArrayList<>(savedRecipe.getTagIds()));
+        List<ImageDTO> images = imageService.getImagesDataByIds(new ArrayList<>(savedRecipe.getImageIds()));
+        return RecipeDTO.fromEntity(savedRecipe, tags, images);
     }
 
     /**
@@ -345,4 +488,31 @@ public class DefaultRecipeService implements RecipeService {
             tagService.incrementUsageCount(tagId);
         }
     }
+
+    private Sort createSort(String sortField, String direction) {
+        // Set default values if not provided.
+        if (sortField == null) sortField = "name";
+        if (direction == null) direction = "asc";
+
+        switch (sortField) {
+            case "name":
+                // Only name is currently implemented in the database.
+                break;
+            case "created_date":
+            case "modification_date":
+            case "last_access_date":
+                // These fields will be implemented later.
+                // For now, default to sorting by name.
+                sortField = "name";
+                break;
+            default:
+                sortField = "name";
+        }
+
+        Sort.Direction sortDirection = direction.equalsIgnoreCase("desc") ?
+                Sort.Direction.DESC : Sort.Direction.ASC;
+
+        return Sort.by(sortDirection, sortField);
+    }
+
 }

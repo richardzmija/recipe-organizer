@@ -1,5 +1,6 @@
 import { Box, Button, IconButton, HStack, VStack } from '@chakra-ui/react';
 import { LuTrash2 } from 'react-icons/lu';
+import { useMemo } from 'react';
 import TextEditor from '@/components/common/TextEditor';
 import { Step } from '@/types/Step';
 
@@ -8,7 +9,14 @@ interface Props {
   onChange: (steps: Step[]) => void;
 }
 
+const editorHeight = '100px';
+
 const StepFields = ({ steps, onChange }: Props) => {
+  // Generate stable random keys for each step - fixes weird behavior
+  const stepKeys = useMemo(() => {
+    return Array.from({ length: steps.length }, () => `step-${Math.random().toString(36).substr(2, 9)}`);
+  }, [steps.length]);
+
   const handleChange = (index: number, field: keyof Step, value: string) => {
     const updated = [...steps];
     updated[index][field] = value;
@@ -26,9 +34,14 @@ const StepFields = ({ steps, onChange }: Props) => {
   return (
     <VStack gap={4} w='100%' align='stretch'>
       {steps.map((step, i) => (
-        <HStack key={i} align='start' gap={3} w='100%'>
+        <HStack key={stepKeys[i]} align='start' gap={3} w='100%'>
           <Box flexShrink={0} maxW='200px' w='200px'>
-            <TextEditor value={step.title} onChange={(val) => handleChange(i, 'title', val)} placeholder='Step name' />
+            <TextEditor
+              value={step.title || `Step ${i + 1}`}
+              onChange={(val) => handleChange(i, 'title', val)}
+              placeholder='Step name'
+              height={editorHeight}
+            />
           </Box>
 
           <Box flex='1'>
@@ -36,6 +49,7 @@ const StepFields = ({ steps, onChange }: Props) => {
               value={step.text}
               onChange={(val) => handleChange(i, 'text', val)}
               placeholder='Step description'
+              height={editorHeight}
             />
           </Box>
 
@@ -44,7 +58,7 @@ const StepFields = ({ steps, onChange }: Props) => {
             variant='outline'
             onClick={() => handleRemove(i)}
             alignSelf='start'
-            minH='77px'>
+            height={editorHeight}>
             <LuTrash2 />
           </IconButton>
         </HStack>

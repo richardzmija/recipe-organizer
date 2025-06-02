@@ -7,6 +7,7 @@ import edu.agh.recipe.units.domain.MeasurementUnit;
 import org.springframework.stereotype.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -40,6 +41,7 @@ public class IngredientParser implements IngredientParserService {
 
         Matcher matcher = PATTERN.matcher(line.trim());
 
+
         if (matcher.matches()) {
             String quantityStr = Optional.ofNullable(matcher.group("qty"))
                     .map(q -> q.replace(',', '.').trim())
@@ -56,6 +58,7 @@ public class IngredientParser implements IngredientParserService {
                 log.warn("Quantity must be positive. Line: '{}'", line);
                 return Optional.empty();
             }
+
 
             String unitStr = Optional.ofNullable(matcher.group("unit"))
                     .map(String::trim)
