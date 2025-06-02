@@ -18,6 +18,7 @@ import {
 } from '@chakra-ui/react';
 import { Tag } from '../../../types/Tag';
 import { LuChevronDown, LuChevronUp, LuX, LuSearch, LuRotateCcw } from 'react-icons/lu';
+import { FAVORITES_TAG_ID } from '@/config/tags';
 
 export interface SearchParams {
   name?: string;
@@ -52,7 +53,7 @@ const SearchForm = ({ searchParams, onSearchParamsChange, onSearch, loading = fa
       const response = await fetch('http://localhost:8080/api/tags?size=100');
       if (response.ok) {
         const data = await response.json();
-        setAvailableTags(data.content || []);
+        setAvailableTags((data.content as Tag[]).filter((t) => t.id !== FAVORITES_TAG_ID));
       }
     } catch (error) {
       console.error('Error fetching tags:', error);

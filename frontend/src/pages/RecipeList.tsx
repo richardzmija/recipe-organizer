@@ -19,7 +19,7 @@ import RecipeCard from '../components/recipe/list/RecipeCard';
 import PaginationControls from '../components/recipe/list/PaginationControls';
 import { usePaginationContext } from '@/hooks/PaginationContext';
 import { toaster } from '@/components/ui/toaster';
-
+import { FAVORITES_TAG_ID, FAVORITES_TAG_NAME } from '@/config/tags';
 interface Props {
   refreshSignal: number;
   onRefresh: () => void;
@@ -36,7 +36,6 @@ interface PaginatedResponse {
 }
 
 export default function RecipeList({ refreshSignal, onRefresh }: Props) {
-  const FAVORITES_KEY = 'favoriteRecipeIds';
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -56,23 +55,6 @@ export default function RecipeList({ refreshSignal, onRefresh }: Props) {
   const closeRef = useRef<HTMLButtonElement>(null);
   const recipesFoundRef = useRef<HTMLDivElement>(null);
 
-  const [favoriteIds, setFavoriteIds] = useState<string[]>(() => {
-    const stored = localStorage.getItem(FAVORITES_KEY);
-    return stored ? (JSON.parse(stored) as string[]) : [];
-  });
-
-  useEffect(() => {
-    localStorage.setItem(FAVORITES_KEY, JSON.stringify(favoriteIds));
-  }, [favoriteIds]);
-
-  useEffect(() => {
-    fetchRecipes();
-  }, []);
-
-  useEffect(() => {
-    fetchRecipes();
-  }, [refreshSignal]);
-
   useEffect(() => {
     if (searchParams.pageNumber !== pagination.number) {
       setSearchParams({ ...searchParams, pageNumber: pagination.number });
@@ -80,6 +62,21 @@ export default function RecipeList({ refreshSignal, onRefresh }: Props) {
       fetchRecipes();
     }
   }, [searchParams]);
+
+  useEffect(() => {
+    setPagination({ ...pagination, number: 0 });
+    setSearchParams({ ...searchParams, pageNumber: 0 });
+    fetchRecipes();
+  }, [showOnlyFavorites]);
+
+  useEffect(() => {
+    fetchRecipes();
+  }, [pagination.number, searchParams]);
+
+  useEffect(() => {
+    fetchRecipes();
+    setIsInitialLoad(false);
+  }, [refreshSignal]);
 
   const handleRecipeSelect = (id: string) => {
     setSelectedIds((prev) => [...prev, id]);
@@ -89,28 +86,80 @@ export default function RecipeList({ refreshSignal, onRefresh }: Props) {
     setSelectedIds((prev) => prev.filter((r) => r !== id));
   };
 
-  const handleToggleFavorite = (id: string) => {
-    setFavoriteIds((prev) => (prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]));
+  const handleToggleFavorite = async (recipeId: string, isFav: boolean) => {
+    const current = recipes.find((r) => r.id === recipeId);
+    if (!current) return;
+
+    const favTag = {
+      id: FAVORITES_TAG_ID,
+      name: FAVORITES_TAG_NAME,
+      existingTag: true,
+    };
+
+    const requestInit: RequestInit = isFav
+      ? {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify([favTag]),
+        }
+      : {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify([favTag]),
+        };
+
+    try {
+      const res = await fetch(`http://localhost:8080/api/recipes/${recipeId}/tags`, requestInit);
+
+      if (res.ok) {
+        const updated: Recipe = await res.json();
+        setRecipes((prev) => prev.map((r) => (r.id === updated.id ? updated : r)));
+
+        if (showOnlyFavorites) {
+          setRecipes((prev) => prev.filter((r) => r.tags?.some((t) => t.id === FAVORITES_TAG_ID)));
+        }
+
+        toaster.create({
+          title: 'Success',
+          description: isFav ? 'Removed from favourites' : 'Added to favourites',
+          type: 'success',
+        });
+      } else {
+        const message =
+          (await res.json().catch(() => undefined))?.message ||
+          (await res.text().catch(() => '')) ||
+          'Failed to update favourites';
+
+        toaster.create({
+          title: 'Error',
+          description: message,
+          type: 'error',
+        });
+      }
+    } catch (err) {
+      toaster.create({
+        title: 'Error',
+        description: err instanceof Error ? err.message : 'An unexpected error occurred',
+        type: 'error',
+      });
+    }
   };
 
   const buildSearchUrl = () => {
     const url = new URL('http://localhost:8080/api/recipes/search/advanced');
 
-    if (searchParams.name) {
-      url.searchParams.set('name', searchParams.name);
+    if (searchParams.name) url.searchParams.set('name', searchParams.name);
+
+    searchParams.ingredients.forEach((ing) => url.searchParams.append('ingredients', ing));
+
+    searchParams.tagIds.forEach((tagId) => url.searchParams.append('tagsID', tagId));
+
+    if (showOnlyFavorites) {
+      url.searchParams.append('tagsID', FAVORITES_TAG_ID);
     }
-
-    searchParams.ingredients.forEach((ingredient) => {
-      url.searchParams.append('ingredients', ingredient);
-    });
-
-    searchParams.tagIds.forEach((tagId) => {
-      url.searchParams.append('tagsID', tagId);
-    });
 
     url.searchParams.set('sort_field', searchParams.sortField);
     url.searchParams.set('direction', searchParams.direction);
-
     url.searchParams.set('page_number', searchParams.pageNumber.toString());
     url.searchParams.set('size', searchParams.size.toString());
 
@@ -265,8 +314,6 @@ export default function RecipeList({ refreshSignal, onRefresh }: Props) {
     </Box>
   );
 
-  const visibleRecipes = showOnlyFavorites ? recipes.filter((r) => r.id && favoriteIds.includes(r.id)) : recipes;
-
   return (
     <Container maxW='container.xl' py={5}>
       <VStack align='stretch'>
@@ -343,30 +390,32 @@ export default function RecipeList({ refreshSignal, onRefresh }: Props) {
           </Flex>
         )}
 
-        {!loading && visibleRecipes.length === 0 ? (
+        {!loading && recipes.length === 0 ? (
           renderEmptyState()
         ) : (
           <VStack align='stretch'>
-            {visibleRecipes.map((recipe) => (
-              <RecipeCard
-                key={recipe.id}
-                recipe={recipe}
-                onDelete={() => {
-                  if (recipe.id) handleOnRecipeDelete(recipe.id);
-                }}
-                onSelect={() => {
-                  if (recipe.id) handleRecipeSelect(recipe.id);
-                }}
-                onUnselect={() => {
-                  if (recipe.id) handleRecipeUnselect(recipe.id);
-                }}
-                isFavorite={favoriteIds.includes(recipe.id ?? '')}
-                onToggleFavorite={() => {
-                  if (recipe.id) handleToggleFavorite(recipe.id);
-                }}
-                onPhotoUploadSuccess={onRefresh}
-              />
-            ))}
+            {recipes.map((recipe) => {
+              const isFav = recipe.tags?.some((t) => t.id === FAVORITES_TAG_ID);
+
+              return (
+                <RecipeCard
+                  key={recipe.id}
+                  recipe={recipe}
+                  onDelete={() => {
+                    if (recipe.id) handleOnRecipeDelete(recipe.id);
+                  }}
+                  onSelect={() => {
+                    if (recipe.id) handleRecipeSelect(recipe.id);
+                  }}
+                  onUnselect={() => {
+                    if (recipe.id) handleRecipeUnselect(recipe.id);
+                  }}
+                  isFavorite={isFav}
+                  onToggleFavorite={() => recipe.id && handleToggleFavorite(recipe.id, isFav)}
+                  onPhotoUploadSuccess={onRefresh}
+                />
+              );
+            })}
           </VStack>
         )}
 
