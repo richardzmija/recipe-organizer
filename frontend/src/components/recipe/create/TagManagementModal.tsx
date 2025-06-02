@@ -18,6 +18,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Tag } from '@/types/Tag';
 import { toaster } from '@/components/ui/toaster';
 import { LuPlus, LuX, LuSettings, LuSave } from 'react-icons/lu';
+import { FAVORITES_TAG_ID, FAVORITES_TAG_NAME } from '@/config/tags';
 
 interface TagManagementModalProps {
   isOpen: boolean;
@@ -212,13 +213,15 @@ const TagManagementModal = ({ isOpen, onClose, selectedTags, onTagsChange }: Tag
 
   const categories = ['All', ...new Set(tags.map((tag) => tag.category).filter(Boolean))];
 
-  const filteredTags = tags.filter((tag) => {
-    const matchesSearch =
-      tag.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (tag.description && tag.description.toLowerCase().includes(searchTerm.toLowerCase()));
-    const matchesCategory = categoryFilter === 'All' || tag.category === categoryFilter;
-    return matchesSearch && matchesCategory;
-  });
+  const filteredTags = tags
+    .filter((tag) => tag.id !== FAVORITES_TAG_ID && tag.name !== FAVORITES_TAG_NAME)
+    .filter((tag) => {
+      const matchesSearch =
+        tag.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (tag.description && tag.description.toLowerCase().includes(searchTerm.toLowerCase()));
+      const matchesCategory = categoryFilter === 'All' || tag.category === categoryFilter;
+      return matchesSearch && matchesCategory;
+    });
 
   const categoryCollection = createListCollection({
     items: [
