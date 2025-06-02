@@ -126,6 +126,7 @@ public class RecipeDataSeeder {
             MeasurementUnit unit = MeasurementUnit.values()[random.nextInt(MeasurementUnit.values().length)];
             double quantity = (random.nextInt(20) + 1) * (random.nextBoolean() ? 0.5 : 1.0);
             
+
             ingredients.add(RecipeIngredient.of(ingredient, unit, quantity));
         }
         
@@ -158,6 +159,7 @@ public class RecipeDataSeeder {
             steps.add(new RecipeStep(title, text));
         }
         
+
         // Get random tags for the recipe
         Set<String> tagIds = getRandomTagIds(2, 5);
         
