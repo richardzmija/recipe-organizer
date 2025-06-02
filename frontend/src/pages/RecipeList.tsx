@@ -55,23 +55,6 @@ export default function RecipeList({ refreshSignal, onRefresh }: Props) {
   const closeRef = useRef<HTMLButtonElement>(null);
   const recipesFoundRef = useRef<HTMLDivElement>(null);
 
-  const [showOnlyFavorites, setShowOnlyFavorites] = useState(false);
-
-  const [filterParams, setFilterParams] = useState<FilterParams>({
-    page: 0,
-    size: 10,
-    sort: 'name',
-    direction: 'asc',
-    ingredients: [],
-  });
-  const [newIngredient, setNewIngredient] = useState('');
-  useEffect(() => {
-    fetchRecipes();
-  }, []);
-
-  useEffect(() => {
-    fetchRecipes(pagination.number);
-  }, [filterParams, refreshSignal, showOnlyFavorites]);
   useEffect(() => {
     if (searchParams.pageNumber !== pagination.number) {
       setSearchParams({ ...searchParams, pageNumber: pagination.number });
@@ -79,6 +62,21 @@ export default function RecipeList({ refreshSignal, onRefresh }: Props) {
       fetchRecipes();
     }
   }, [searchParams]);
+
+  useEffect(() => {
+    setPagination({ ...pagination, number: 0 });
+    setSearchParams({ ...searchParams, pageNumber: 0 });
+    fetchRecipes();
+  }, [showOnlyFavorites]);
+
+  useEffect(() => {
+    fetchRecipes();
+  }, [pagination.number, searchParams]);
+
+  useEffect(() => {
+    fetchRecipes();
+    setIsInitialLoad(false);
+  }, [refreshSignal]);
 
   const handleRecipeSelect = (id: string) => {
     setSelectedIds((prev) => [...prev, id]);
@@ -150,31 +148,18 @@ export default function RecipeList({ refreshSignal, onRefresh }: Props) {
   const buildSearchUrl = () => {
     const url = new URL('http://localhost:8080/api/recipes/search/advanced');
 
-    if (searchParams.name) {
-      url.searchParams.set('name', searchParams.name);
+    if (searchParams.name) url.searchParams.set('name', searchParams.name);
+
+    searchParams.ingredients.forEach((ing) => url.searchParams.append('ingredients', ing));
+
+    searchParams.tagIds.forEach((tagId) => url.searchParams.append('tagsID', tagId));
+
+    if (showOnlyFavorites) {
+      url.searchParams.append('tagsID', FAVORITES_TAG_ID);
     }
 
-    searchParams.ingredients.forEach((ingredient) => {
-      url.searchParams.append('ingredients', ingredient);
-    });
-
-    searchParams.tagIds.forEach((tagId) => {
-      url.searchParams.append('tagsID', tagId);
-    });
-
-        url += `&page=${page}&size=${filterParams.size}`;
-        url += `&sort=${filterParams.sort}&direction=${filterParams.direction}`;
-      } else if (showOnlyFavorites) {
-        url = `http://localhost:8080/api/recipes/filter/tag/by-id?tagId=${FAVORITES_TAG_ID}`;
-        url += `&page=${page}&size=${filterParams.size}`;
-        url += `&sort=${filterParams.sort}&direction=${filterParams.direction}`;
-      } else {
-        url = `http://localhost:8080/api/recipes?page=${page}&size=${filterParams.size}`;
-        url += `&sort=${filterParams.sort}&direction=${filterParams.direction}`;
-      }
     url.searchParams.set('sort_field', searchParams.sortField);
     url.searchParams.set('direction', searchParams.direction);
-
     url.searchParams.set('page_number', searchParams.pageNumber.toString());
     url.searchParams.set('size', searchParams.size.toString());
 
