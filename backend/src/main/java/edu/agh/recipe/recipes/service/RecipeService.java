@@ -48,4 +48,12 @@ public interface RecipeService {
     RecipeDTO setImageAsPrimary(String id, String imageId);
     RecipeDTO linkImagesToRecipe(String recipeId, List<String> imageIds);
 
+    // Advanced search functionality
+    Page<RecipeDTO> advancedSearch(
+        String name,
+        List<String> ingredients,
+        List<String> tagIds,
+        String sortField,
+        String direction,
+        Pageable pageable);
 }
