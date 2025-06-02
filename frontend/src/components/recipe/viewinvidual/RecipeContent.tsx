@@ -32,9 +32,9 @@ interface RecipeContentProps {
 export const RecipeContent = ({ recipe: initialRecipe }: RecipeContentProps) => {
   const [recipe, setRecipe] = useState(initialRecipe);
   const [, setRefreshKey] = useState(0);
-  const [unitConversions, setUnitConversions] = useState<ListCollection<UnitCollectionItem>>(
+  const [unitConversions, setUnitConversions] = useState<ListCollection<UnitCollectionItem>[]>([
     createListCollection({ items: [] as UnitCollectionItem[] }),
-  );
+  ]);
   const [selectedUnits, setSelectedUnits] = useState<string[]>([]);
   const [quantities, setQuantities] = useState<{ value: number; formattedValue: string }[]>([]);
   const [loadedUnitConversions, setLoadedUnitConversions] = useState<boolean>(false);
@@ -54,16 +54,22 @@ export const RecipeContent = ({ recipe: initialRecipe }: RecipeContentProps) => 
   };
 
   const getUnitConversions = async () => {
+    const responses: ListCollection<UnitCollectionItem>[] = [];
     try {
-      const response = await fetch('http://localhost:8080/api/units');
-      if (response.ok) {
-        const units = (await response.json()) as ConvertiableUnit[];
-        setUnitConversions(formatUnitConversionToCollection(units));
+      for (let i = 0; i < recipe.ingredients.length; i++) {
+        const response = await fetch(`http://localhost:8080/api/units/${recipe.ingredients[i].unit}/compatible`);
+        if (response.ok) {
+          const conversions = (await response.json()) as ConvertiableUnit[];
+          responses.push(formatUnitConversionToCollection(conversions));
+        } else {
+          responses.push(createListCollection({ items: [] as UnitCollectionItem[] }));
+        }
       }
     } catch (error) {
       console.error('Error getting unit conversions: ', error);
     } finally {
       setLoadedUnitConversions(true);
+      setUnitConversions(responses);
     }
   };
 
@@ -134,8 +140,8 @@ export const RecipeContent = ({ recipe: initialRecipe }: RecipeContentProps) => 
   };
 
   const handleSelect = async (index: number, selectedUnit: UnitCollectionItem) => {
-    const value = quantities[index].value;
-    const fromUnit = selectedUnits[index];
+    const value = recipe.ingredients[index].quantity;
+    const fromUnit = recipe.ingredients[index].unit;
     const toUnit = selectedUnit.value;
     const canConvert = await checkConversionPossibility(fromUnit, toUnit);
     if (!canConvert) {
@@ -212,7 +218,7 @@ export const RecipeContent = ({ recipe: initialRecipe }: RecipeContentProps) => 
                       {loadedUnitConversions && quantities[index].formattedValue}
                       {loadedUnitConversions && (
                         <Select.Root
-                          collection={unitConversions}
+                          collection={unitConversions[index]}
                           size='sm'
                           width={'200px'}
                           value={[selectedUnits[index]]}
@@ -225,7 +231,7 @@ export const RecipeContent = ({ recipe: initialRecipe }: RecipeContentProps) => 
                           <Portal>
                             <Select.Positioner>
                               <Select.Content>
-                                {unitConversions.items.map((unitConversion) => (
+                                {unitConversions[index].items.map((unitConversion) => (
                                   <Select.Item item={unitConversion} key={unitConversion.value}>
                                     {unitConversion.label}
                                   </Select.Item>
