@@ -53,6 +53,21 @@ const RecipeCreateForm: FC<Props> = (props: Props) => {
       return;
     }
 
+    if (steps.some((step) => step.text.trim() === '')) {
+      toaster.create({
+        title: 'Error',
+        description: 'Step description cannot be empty.',
+        type: 'error',
+      });
+      return;
+    }
+
+    steps.forEach((step, i) => {
+      if (step.title.trim() === '') {
+        steps[i].title = `Step ${i + 1}`;
+      }
+    });
+
     const tagReferences = tags.map((tag) => ({
       id: tag.id,
     }));
@@ -74,11 +89,12 @@ const RecipeCreateForm: FC<Props> = (props: Props) => {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload),
         });
-
-        if (response.ok) {
-          const data = await response.json();
-          savedRecipeId = data.id;
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || 'Failed to create recipe');
         }
+        const data = await response.json();
+        savedRecipeId = data.id;
       }
 
       if (mode === 'edit') {
@@ -88,26 +104,28 @@ const RecipeCreateForm: FC<Props> = (props: Props) => {
           body: JSON.stringify(payload),
         });
 
-        if (response.ok) {
-          savedRecipeId = props.id as string;
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || 'Failed to create recipe');
+        }
+        savedRecipeId = props.id as string;
 
-          if (images && images.length > 0) {
-            try {
-              const imageIdsToPreserve = images.map((img) => img.id);
+        if (images && images.length > 0) {
+          try {
+            const imageIdsToPreserve = images.map((img) => img.id);
 
-              await fetch(`http://localhost:8080/api/recipes/${savedRecipeId}/images/link`, {
-                method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(imageIdsToPreserve),
-              });
-            } catch (imageError) {
-              console.error('Error preserving images:', imageError);
-              toaster.create({
-                title: 'Warning',
-                description: 'Recipe was updated but there was an issue preserving the images',
-                type: 'warning',
-              });
-            }
+            await fetch(`http://localhost:8080/api/recipes/${savedRecipeId}/images/link`, {
+              method: 'PATCH',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(imageIdsToPreserve),
+            });
+          } catch (imageError) {
+            console.error('Error preserving images:', imageError);
+            toaster.create({
+              title: 'Warning',
+              description: 'Recipe was updated but there was an issue preserving the images',
+              type: 'warning',
+            });
           }
         }
       }

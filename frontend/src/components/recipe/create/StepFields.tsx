@@ -37,7 +37,7 @@ const StepFields = ({ steps, onChange }: Props) => {
         <HStack key={stepKeys[i]} align='start' gap={3} w='100%'>
           <Box flexShrink={0} maxW='200px' w='200px'>
             <TextEditor
-              value={step.title || `Step ${i + 1}`}
+              value={step.title}
               onChange={(val) => handleChange(i, 'title', val)}
               placeholder='Step name'
               height={editorHeight}
