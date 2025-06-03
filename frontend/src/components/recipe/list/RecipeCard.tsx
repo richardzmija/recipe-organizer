@@ -129,17 +129,19 @@ const RecipeCard = ({
           <Box flex='2'>
             <Heading as='h3' size='xl' mb={1} dangerouslySetInnerHTML={{ __html: recipe.name }} />
 
-            {recipe.tags && recipe.tags.length > 0 && (
-              <HStack gap={2} mb={4}>
-                {recipe.tags
-                  .filter((tag) => tag.id !== FAVORITES_TAG_ID && tag.name !== FAVORITES_TAG_NAME)
-                  .map((tag) => (
-                    <Badge key={tag.id} variant='subtle' shadow='sm' style={{ backgroundColor: tag.color }}>
-                      {tag.name}
-                    </Badge>
-                  ))}
-              </HStack>
-            )}
+            {recipe.tags &&
+              recipe.tags.length > 0 &&
+              !(recipe.tags.length === 1 && recipe.tags[0].id === FAVORITES_TAG_ID) && (
+                <HStack gap={2} mb={4}>
+                  {recipe.tags
+                    .filter((tag) => tag.id !== FAVORITES_TAG_ID && tag.name !== FAVORITES_TAG_NAME)
+                    .map((tag) => (
+                      <Badge key={tag.id} variant='subtle' shadow='sm' style={{ backgroundColor: tag.color }}>
+                        {tag.name}
+                      </Badge>
+                    ))}
+                </HStack>
+              )}
 
             {recipe.description && <Text fontSize='md' dangerouslySetInnerHTML={{ __html: recipe.description }} />}
 
