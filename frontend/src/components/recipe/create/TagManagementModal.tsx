@@ -281,7 +281,7 @@ const TagManagementModal = ({ isOpen, onClose, selectedTags, onTagsChange }: Tag
     <Dialog.Root open={isOpen}>
       <Dialog.Backdrop />
       <Dialog.Positioner>
-        <Dialog.Content ref={modalRef} maxW='80%' maxH='90vh' w='800px'>
+        <Dialog.Content ref={modalRef} maxW='80%' w='800px'>
           <Dialog.CloseTrigger />
           <Dialog.Header>
             <HStack>

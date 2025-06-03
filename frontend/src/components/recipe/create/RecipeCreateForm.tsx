@@ -22,6 +22,7 @@ interface Props {
   images?: Image[];
   onCancel: () => void;
   mode: 'edit' | 'create';
+  preview?: boolean;
 }
 
 const RecipeCreateForm: FC<Props> = (props: Props) => {
@@ -32,13 +33,31 @@ const RecipeCreateForm: FC<Props> = (props: Props) => {
   const [steps, setSteps] = useState<Step[]>(props.steps || []);
   const [images] = useState(props.images || []);
   const [showPreview, setShowPreview] = useState(false);
-  const { onCancel, mode } = props;
+  const { onCancel, mode, preview } = props;
 
   const handleSave = async () => {
     if (!name.trim() || steps.length === 0 || ingredients.length === 0) {
       toaster.create({
         title: 'Error',
-        description: 'Title, ingredients and steps cannot be empty',
+        description: 'Title cannot be empty',
+        type: 'error',
+      });
+      return;
+    }
+
+    if (steps.length === 0) {
+      toaster.create({
+        title: 'Error',
+        description: 'Steps cannot be empty',
+        type: 'error',
+      });
+      return;
+    }
+
+    if (ingredients.length === 0) {
+      toaster.create({
+        title: 'Error',
+        description: 'Ingredients cannot be empty',
         type: 'error',
       });
       return;
@@ -52,6 +71,30 @@ const RecipeCreateForm: FC<Props> = (props: Props) => {
       });
       return;
     }
+
+    if (ingredients.some((ingredient) => !ingredient.unit || ingredient.unit.trim() === '')) {
+      toaster.create({
+        title: 'Error',
+        description: 'Unit has to be chosen.',
+        type: 'error',
+      });
+      return;
+    }
+
+    if (steps.some((step) => step.text.trim() === '')) {
+      toaster.create({
+        title: 'Error',
+        description: 'Step description cannot be empty.',
+        type: 'error',
+      });
+      return;
+    }
+
+    steps.forEach((step, i) => {
+      if (step.title.trim() === '') {
+        steps[i].title = `Step ${i + 1}`;
+      }
+    });
 
     const tagReferences = tags.map((tag) => ({
       id: tag.id,
@@ -74,11 +117,12 @@ const RecipeCreateForm: FC<Props> = (props: Props) => {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload),
         });
-
-        if (response.ok) {
-          const data = await response.json();
-          savedRecipeId = data.id;
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || 'Failed to create recipe');
         }
+        const data = await response.json();
+        savedRecipeId = data.id;
       }
 
       if (mode === 'edit') {
@@ -88,26 +132,28 @@ const RecipeCreateForm: FC<Props> = (props: Props) => {
           body: JSON.stringify(payload),
         });
 
-        if (response.ok) {
-          savedRecipeId = props.id as string;
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || 'Failed to create recipe');
+        }
+        savedRecipeId = props.id as string;
 
-          if (images && images.length > 0) {
-            try {
-              const imageIdsToPreserve = images.map((img) => img.id);
+        if (images && images.length > 0) {
+          try {
+            const imageIdsToPreserve = images.map((img) => img.id);
 
-              await fetch(`http://localhost:8080/api/recipes/${savedRecipeId}/images/link`, {
-                method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(imageIdsToPreserve),
-              });
-            } catch (imageError) {
-              console.error('Error preserving images:', imageError);
-              toaster.create({
-                title: 'Warning',
-                description: 'Recipe was updated but there was an issue preserving the images',
-                type: 'warning',
-              });
-            }
+            await fetch(`http://localhost:8080/api/recipes/${savedRecipeId}/images/link`, {
+              method: 'PATCH',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(imageIdsToPreserve),
+            });
+          } catch (imageError) {
+            console.error('Error preserving images:', imageError);
+            toaster.create({
+              title: 'Warning',
+              description: 'Recipe was updated but there was an issue preserving the images',
+              type: 'warning',
+            });
           }
         }
       }
@@ -174,32 +220,36 @@ const RecipeCreateForm: FC<Props> = (props: Props) => {
           <Button variant='solid' onClick={handleSave}>
             Save recipe
           </Button>
-          <Button variant='outline' onClick={openPreview}>
-            Show preview
-          </Button>
+          {(preview ?? true) && (
+            <Button variant='outline' onClick={openPreview}>
+              Show preview
+            </Button>
+          )}
           <Button variant='outline' onClick={onCancel}>
             Cancel
           </Button>
         </HStack>
       </VStack>
 
-      <Dialog.Root open={showPreview}>
-        <Dialog.Backdrop />
-        <Dialog.Positioner>
-          <Dialog.Content maxW='80%' maxH='90vh' overflowY='auto'>
-            <Dialog.CloseTrigger />
-            <Dialog.Header>
-              <Dialog.Title>Recipe Preview</Dialog.Title>
-            </Dialog.Header>
-            <Dialog.Body>
-              <RecipeContent recipe={previewRecipe} />
-            </Dialog.Body>
-            <Dialog.Footer>
-              <Button onClick={closePreview}>Close</Button>
-            </Dialog.Footer>
-          </Dialog.Content>
-        </Dialog.Positioner>
-      </Dialog.Root>
+      {(preview ?? true) && (
+        <Dialog.Root open={showPreview}>
+          <Dialog.Backdrop />
+          <Dialog.Positioner>
+            <Dialog.Content maxW='80%' maxH='90vh' overflowY='auto'>
+              <Dialog.CloseTrigger />
+              <Dialog.Header>
+                <Dialog.Title>Recipe Preview</Dialog.Title>
+              </Dialog.Header>
+              <Dialog.Body>
+                <RecipeContent recipe={previewRecipe} />
+              </Dialog.Body>
+              <Dialog.Footer>
+                <Button onClick={closePreview}>Close</Button>
+              </Dialog.Footer>
+            </Dialog.Content>
+          </Dialog.Positioner>
+        </Dialog.Root>
+      )}
     </Box>
   );
 };

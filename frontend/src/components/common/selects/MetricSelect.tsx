@@ -1,4 +1,4 @@
-import { Select, Portal, createListCollection } from '@chakra-ui/react';
+import { Select, createListCollection } from '@chakra-ui/react';
 import { useEffect, useState } from 'react';
 
 interface UnitType {
@@ -57,25 +57,23 @@ export default function MetricSelect({ value, onChange }: Props) {
       <Select.HiddenSelect />
       <Select.Control>
         <Select.Trigger>
-          <Select.ValueText placeholder='Jednostka' />
+          <Select.ValueText placeholder='Unit' />
         </Select.Trigger>
         <Select.IndicatorGroup>
           <Select.Indicator />
         </Select.IndicatorGroup>
       </Select.Control>
 
-      <Portal>
-        <Select.Positioner>
-          <Select.Content>
-            {collection.items.map((item) => (
-              <Select.Item key={item.value} item={item}>
-                {item.label}
-                <Select.ItemIndicator />
-              </Select.Item>
-            ))}
-          </Select.Content>
-        </Select.Positioner>
-      </Portal>
+      <Select.Positioner>
+        <Select.Content>
+          {collection.items.map((item) => (
+            <Select.Item key={item.value} item={item}>
+              {item.label}
+              <Select.ItemIndicator />
+            </Select.Item>
+          ))}
+        </Select.Content>
+      </Select.Positioner>
     </Select.Root>
   );
 }

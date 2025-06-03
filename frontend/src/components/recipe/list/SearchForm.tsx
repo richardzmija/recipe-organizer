@@ -19,6 +19,7 @@ import {
 import { Tag } from '../../../types/Tag';
 import { LuChevronDown, LuChevronUp, LuX, LuSearch, LuRotateCcw } from 'react-icons/lu';
 import { FAVORITES_TAG_ID } from '@/config/tags';
+import { useColorModeValue } from '@/components/ui/color-mode';
 
 export interface SearchParams {
   name?: string;
@@ -164,7 +165,7 @@ const SearchForm = ({ searchParams, onSearchParamsChange, onSearch, loading = fa
               onKeyPress={(e) => e.key === 'Enter' && onSearch()}
             />
           </Box>
-          <Button colorPalette='blue' onClick={onSearch}>
+          <Button color={useColorModeValue('white', 'black')} colorPalette='blue' onClick={onSearch}>
             <LuSearch />
             Search
           </Button>
