@@ -29,7 +29,7 @@ export default function Navbar({ onRefresh }: Props) {
         <Spacer />
 
         <HStack gap={4}>
-          <Link to='/recipes'>
+          <Link to='/'>
             <Button variant='ghost'>All Recipes</Button>
           </Link>
           <Link to='/recipes/create'>
