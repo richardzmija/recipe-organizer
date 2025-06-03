@@ -39,7 +39,25 @@ const RecipeCreateForm: FC<Props> = (props: Props) => {
     if (!name.trim() || steps.length === 0 || ingredients.length === 0) {
       toaster.create({
         title: 'Error',
-        description: 'Title, ingredients and steps cannot be empty',
+        description: 'Title cannot be empty',
+        type: 'error',
+      });
+      return;
+    }
+
+    if (steps.length === 0) {
+      toaster.create({
+        title: 'Error',
+        description: 'Steps cannot be empty',
+        type: 'error',
+      });
+      return;
+    }
+
+    if (ingredients.length === 0) {
+      toaster.create({
+        title: 'Error',
+        description: 'Ingredients cannot be empty',
         type: 'error',
       });
       return;
@@ -49,6 +67,15 @@ const RecipeCreateForm: FC<Props> = (props: Props) => {
       toaster.create({
         title: 'Error',
         description: 'Ingredient quantity has to be greater than 0.',
+        type: 'error',
+      });
+      return;
+    }
+
+    if (ingredients.some((ingredient) => !!ingredient.unit || ingredient.unit.trim() === '')) {
+      toaster.create({
+        title: 'Error',
+        description: 'Unit has to be chosen.',
         type: 'error',
       });
       return;

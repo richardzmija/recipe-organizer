@@ -156,6 +156,7 @@ const ImportRecipeForm: FC<Props> = () => {
             <Dialog.Body>
               {recipe && (
                 <RecipeCreateForm
+                  preview={false}
                   mode='create'
                   name={recipe?.name}
                   ingredients={recipe.ingredients}

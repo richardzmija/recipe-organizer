@@ -57,7 +57,7 @@ export default function MetricSelect({ value, onChange }: Props) {
       <Select.HiddenSelect />
       <Select.Control>
         <Select.Trigger>
-          <Select.ValueText placeholder='Jednostka' />
+          <Select.ValueText placeholder='Unit' />
         </Select.Trigger>
         <Select.IndicatorGroup>
           <Select.Indicator />
