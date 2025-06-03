@@ -22,6 +22,7 @@ interface Props {
   images?: Image[];
   onCancel: () => void;
   mode: 'edit' | 'create';
+  preview?: boolean;
 }
 
 const RecipeCreateForm: FC<Props> = (props: Props) => {
@@ -32,7 +33,7 @@ const RecipeCreateForm: FC<Props> = (props: Props) => {
   const [steps, setSteps] = useState<Step[]>(props.steps || []);
   const [images] = useState(props.images || []);
   const [showPreview, setShowPreview] = useState(false);
-  const { onCancel, mode } = props;
+  const { onCancel, mode, preview } = props;
 
   const handleSave = async () => {
     if (!name.trim() || steps.length === 0 || ingredients.length === 0) {
@@ -192,32 +193,36 @@ const RecipeCreateForm: FC<Props> = (props: Props) => {
           <Button variant='solid' onClick={handleSave}>
             Save recipe
           </Button>
-          <Button variant='outline' onClick={openPreview}>
-            Show preview
-          </Button>
+          {(preview ?? true) && (
+            <Button variant='outline' onClick={openPreview}>
+              Show preview
+            </Button>
+          )}
           <Button variant='outline' onClick={onCancel}>
             Cancel
           </Button>
         </HStack>
       </VStack>
 
-      <Dialog.Root open={showPreview}>
-        <Dialog.Backdrop />
-        <Dialog.Positioner>
-          <Dialog.Content maxW='80%' maxH='90vh' overflowY='auto'>
-            <Dialog.CloseTrigger />
-            <Dialog.Header>
-              <Dialog.Title>Recipe Preview</Dialog.Title>
-            </Dialog.Header>
-            <Dialog.Body>
-              <RecipeContent recipe={previewRecipe} />
-            </Dialog.Body>
-            <Dialog.Footer>
-              <Button onClick={closePreview}>Close</Button>
-            </Dialog.Footer>
-          </Dialog.Content>
-        </Dialog.Positioner>
-      </Dialog.Root>
+      {(preview ?? true) && (
+        <Dialog.Root open={showPreview}>
+          <Dialog.Backdrop />
+          <Dialog.Positioner>
+            <Dialog.Content maxW='80%' maxH='90vh' overflowY='auto'>
+              <Dialog.CloseTrigger />
+              <Dialog.Header>
+                <Dialog.Title>Recipe Preview</Dialog.Title>
+              </Dialog.Header>
+              <Dialog.Body>
+                <RecipeContent recipe={previewRecipe} />
+              </Dialog.Body>
+              <Dialog.Footer>
+                <Button onClick={closePreview}>Close</Button>
+              </Dialog.Footer>
+            </Dialog.Content>
+          </Dialog.Positioner>
+        </Dialog.Root>
+      )}
     </Box>
   );
 };

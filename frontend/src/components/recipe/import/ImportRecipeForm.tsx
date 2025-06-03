@@ -152,7 +152,7 @@ const ImportRecipeForm: FC<Props> = () => {
           </Field.HelperText>
         </Field.Root>
       </Container>
-      <Dialog.Root open={openEditDialog}>
+      <Dialog.Root open={openEditDialog} onInteractOutside={() => setOpenEditDialog(false)}>
         <Dialog.Backdrop />
         <Dialog.Positioner>
           <Dialog.Content maxW='80%' maxH='90vh' overflowY='auto'>
@@ -161,15 +161,17 @@ const ImportRecipeForm: FC<Props> = () => {
               <Dialog.Title>Imported Recipe</Dialog.Title>
             </Dialog.Header>
             <Dialog.Body>
-              <RecipeCreateForm
-                mode='create'
-                name={recipe?.name}
-                ingredients={imputeNullUnits(recipe!)}
-                steps={recipe?.steps}
-                tags={recipe?.tags}
-                description={recipe?.description}
-                onCancel={() => setOpenEditDialog(false)}
-              />
+              {recipe && (
+                <RecipeCreateForm
+                  mode='create'
+                  name={recipe?.name}
+                  ingredients={imputeNullUnits(recipe!)}
+                  steps={recipe?.steps}
+                  tags={recipe?.tags}
+                  description={recipe?.description}
+                  onCancel={() => setOpenEditDialog(false)}
+                />
+              )}
             </Dialog.Body>
             <Dialog.Footer>
               <Button onClick={() => setOpenEditDialog(false)}>Close</Button>
