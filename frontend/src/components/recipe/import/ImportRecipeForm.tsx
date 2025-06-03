@@ -118,12 +118,14 @@ const ImportRecipeForm: FC<Props> = () => {
                 }}
               />
             </InputGroup>
-            <Button bg='bg.subtle' variant='outline' colorPalette='green' onClick={handleClick}>
+            <Button variant='solid' colorPalette='green' onClick={handleClick}>
               Import
             </Button>
           </Group>
           <Field.HelperText>
             <Tooltip
+              openDelay={10}
+              closeDelay={10}
               content={
                 <Box p={2}>
                   <List.Root>
