@@ -1,32 +1,97 @@
-import { mojeWypiekiRegex } from '@/utils/regexes';
-import { Container, Input, Field, InputGroup, Group, Button } from '@chakra-ui/react';
+import { Container, Input, Field, InputGroup, Group, Button, List, Box, Dialog } from '@chakra-ui/react';
 import { FC, useState } from 'react';
 import { IoIosLink } from 'react-icons/io';
 import { toaster } from '@/components/ui/toaster';
+import { ImportResponse } from '@/types/Import';
+import { Recipe } from '@/types/Recipe';
+import { Tooltip } from '@/components/ui/tooltip';
+import { Ingredient } from '@/types/Ingredient';
+import RecipeCreateForm from '../create/RecipeCreateForm';
 
 interface Props {
   onSuccess?: () => void;
 }
 
-const ImportRecipeForm: FC<Props> = ({ onSuccess }: Props) => {
+const ImportRecipeForm: FC<Props> = () => {
   const [url, setUrl] = useState('');
-  const [hasError, setHasError] = useState(false);
-  const importURL = 'http://localhost:8080/api/recipes/import/mojewypieki';
+  const [recipe, setRecipe] = useState<Recipe | null>(null);
+  const [openEditDialog, setOpenEditDialog] = useState(false);
+  const importURL = 'http://localhost:8080/api/recipes/import/jobs';
 
-  const importRecipe = async () => {
+  const submitImportJob = async () => {
     try {
-      const response = await fetch(importURL + `?url=${encodeURIComponent(url)}`, {
+      const response = await fetch(importURL, {
         method: 'POST',
-        headers: { Accept: 'application/json' },
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url }),
       });
 
-      if (response.ok) {
+      if (!response.ok) {
         toaster.create({
-          title: 'Success',
-          description: 'Recipe imported successfully',
-          type: 'success',
+          title: 'Error',
+          description: `Cannot import recipe from URL: ${url}.`,
+          type: 'error',
         });
-        onSuccess?.();
+        return;
+      }
+
+      const job = (await response.json()) as ImportResponse;
+
+      return job;
+    } catch (error) {
+      toaster.create({
+        title: 'Error',
+        description: `Cannot import recipe.\n ${error}`,
+        type: 'error',
+      });
+    }
+  };
+
+  const imputeNullUnits = (recipe: Recipe): Ingredient[] => {
+    return recipe.ingredients.map((ingredient) =>
+      ingredient.unit
+        ? ingredient
+        : { ingredientName: ingredient.ingredientName, quantity: ingredient.quantity, unit: 'GRAMS' },
+    );
+  };
+
+  const importRecipe = async (jobId: string, wait: boolean = true) => {
+    try {
+      const response = await fetch(importURL + '/' + jobId);
+      if (!response.ok) {
+        toaster.create({
+          title: 'Error',
+          description: `Cannot import recipe from URL: ${url}.`,
+          type: 'error',
+        });
+        return;
+      }
+
+      const job = (await response.json()) as ImportResponse;
+
+      switch (job.status) {
+        case 'STARTED':
+          return;
+        case 'IN_PROGRESS':
+          if (wait) setTimeout(() => importRecipe(jobId, false), 5000);
+          else
+            toaster.create({
+              title: 'Error',
+              description: `Importing recipe from URL: ${url} took too long.`,
+              type: 'error',
+            });
+          return;
+        case 'COMPLETED':
+          setRecipe(job.result);
+          setOpenEditDialog(true);
+          return;
+        case 'FAILED':
+          toaster.create({
+            title: 'Error',
+            description: `Cannot import recipe from URL: ${url}.`,
+            type: 'error',
+          });
+          return;
       }
     } catch (error) {
       toaster.create({
@@ -38,41 +103,81 @@ const ImportRecipeForm: FC<Props> = ({ onSuccess }: Props) => {
   };
 
   const handleClick = () => {
-    if (!mojeWypiekiRegex.test(url)) {
-      setHasError(true);
-      return;
-    }
-    setHasError(false);
-    (async () => importRecipe())();
+    (async () => {
+      const job = await submitImportJob();
+      if (!job) return;
+      await importRecipe(job.jobId);
+    })();
   };
 
   return (
-    <Container py={5}>
-      <Field.Root invalid={hasError}>
-        <Field.Label>
-          URL <Field.RequiredIndicator />
-        </Field.Label>
-        <Group attached w='full'>
-          <InputGroup startElement={<IoIosLink />}>
-            <Input
-              placeholder='Enter URL of recipe'
-              value={url}
-              onChange={(e) => {
-                setUrl(e.target.value);
-                if (hasError) setHasError(false); // reset error on input change
-              }}
-            />
-          </InputGroup>
-          <Button bg='bg.subtle' variant='outline' colorPalette='green' onClick={handleClick}>
-            Import
-          </Button>
-        </Group>
-        {hasError && <Field.ErrorText>Invalid URL. Must be from https://mojewypieki.com/przepis/…</Field.ErrorText>}
-        <Field.HelperText>
-          We are only supporting <strong>mojewypieki.com</strong> for now.
-        </Field.HelperText>
-      </Field.Root>
-    </Container>
+    <>
+      <Container py={5}>
+        <Field.Root>
+          <Field.Label>
+            URL <Field.RequiredIndicator />
+          </Field.Label>
+          <Group attached w='full'>
+            <InputGroup startElement={<IoIosLink />}>
+              <Input
+                placeholder='Enter URL of recipe'
+                value={url}
+                onChange={(e) => {
+                  setUrl(e.target.value);
+                }}
+              />
+            </InputGroup>
+            <Button bg='bg.subtle' variant='outline' colorPalette='green' onClick={handleClick}>
+              Import
+            </Button>
+          </Group>
+          <Field.HelperText>
+            <Tooltip
+              content={
+                <Box p={2}>
+                  <List.Root>
+                    <List.Item>aniagotuje.pl</List.Item>
+                    <List.Item>mojewypieki.com</List.Item>
+                    <List.Item>kwestiasmaku.com</List.Item>
+                    <List.Item>przepisy.pl</List.Item>
+                    <List.Item>poprostupycha.com.pl</List.Item>
+                  </List.Root>
+                </Box>
+              }
+              positioning={{ placement: 'bottom' }}>
+              <u>
+                <strong>Supported URLs</strong>
+              </u>
+            </Tooltip>
+          </Field.HelperText>
+        </Field.Root>
+      </Container>
+      <Dialog.Root open={openEditDialog}>
+        <Dialog.Backdrop />
+        <Dialog.Positioner>
+          <Dialog.Content maxW='80%' maxH='90vh' overflowY='auto'>
+            <Dialog.CloseTrigger />
+            <Dialog.Header>
+              <Dialog.Title>Imported Recipe</Dialog.Title>
+            </Dialog.Header>
+            <Dialog.Body>
+              <RecipeCreateForm
+                mode='create'
+                name={recipe?.name}
+                ingredients={imputeNullUnits(recipe!)}
+                steps={recipe?.steps}
+                tags={recipe?.tags}
+                description={recipe?.description}
+                onCancel={() => setOpenEditDialog(false)}
+              />
+            </Dialog.Body>
+            <Dialog.Footer>
+              <Button onClick={() => setOpenEditDialog(false)}>Close</Button>
+            </Dialog.Footer>
+          </Dialog.Content>
+        </Dialog.Positioner>
+      </Dialog.Root>
+    </>
   );
 };
 
