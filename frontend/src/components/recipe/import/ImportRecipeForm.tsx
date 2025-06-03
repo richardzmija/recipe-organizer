@@ -5,7 +5,6 @@ import { toaster } from '@/components/ui/toaster';
 import { ImportResponse } from '@/types/Import';
 import { Recipe } from '@/types/Recipe';
 import { Tooltip } from '@/components/ui/tooltip';
-import { Ingredient } from '@/types/Ingredient';
 import RecipeCreateForm from '../create/RecipeCreateForm';
 
 interface Props {
@@ -45,14 +44,6 @@ const ImportRecipeForm: FC<Props> = () => {
         type: 'error',
       });
     }
-  };
-
-  const imputeNullUnits = (recipe: Recipe): Ingredient[] => {
-    return recipe.ingredients.map((ingredient) =>
-      ingredient.unit
-        ? ingredient
-        : { ingredientName: ingredient.ingredientName, quantity: ingredient.quantity, unit: 'GRAMS' },
-    );
   };
 
   const importRecipe = async (jobId: string, wait: boolean = true) => {
@@ -165,7 +156,7 @@ const ImportRecipeForm: FC<Props> = () => {
                 <RecipeCreateForm
                   mode='create'
                   name={recipe?.name}
-                  ingredients={imputeNullUnits(recipe!)}
+                  ingredients={recipe.ingredients}
                   steps={recipe?.steps}
                   tags={recipe?.tags}
                   description={recipe?.description}
