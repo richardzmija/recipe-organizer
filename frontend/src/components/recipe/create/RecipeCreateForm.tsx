@@ -72,7 +72,7 @@ const RecipeCreateForm: FC<Props> = (props: Props) => {
       return;
     }
 
-    if (ingredients.some((ingredient) => !!ingredient.unit || ingredient.unit.trim() === '')) {
+    if (ingredients.some((ingredient) => !ingredient.unit || ingredient.unit.trim() === '')) {
       toaster.create({
         title: 'Error',
         description: 'Unit has to be chosen.',
